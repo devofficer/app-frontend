@@ -1,7 +1,7 @@
 {
-  "short_name": "PancakeSwap",
+  "short_name": "GPNSwap",
   "name": "PancakeSwap",
-  "description": "Farm CAKE with Pancake LP Tokens",
+  "description": "Farm on energy projects",
   "icons": [
     {
       "src": "favicon.ico",
