@@ -4,12 +4,12 @@ import { Heading, Text, BaseLayout } from '@pancakeswap/uikit'
 import { useTranslation } from 'contexts/Localization'
 import Page from 'components/layout/Page'
 import FarmStakingCard from 'views/Home/components/FarmStakingCard'
-import LotteryCard from 'views/Home/components/LotteryCard'
 import CakeStats from 'views/Home/components/CakeStats'
 import TotalValueLockedCard from 'views/Home/components/TotalValueLockedCard'
 import EarnAPRCard from 'views/Home/components/EarnAPRCard'
 import EarnAssetCard from 'views/Home/components/EarnAssetCard'
 import WinCard from 'views/Home/components/WinCard'
+import EnergyChart from './components/EnergyChart'
 
 const Hero = styled.div`
   align-items: center;
@@ -78,7 +78,6 @@ const CTACards = styled(BaseLayout)`
 
 const Home: React.FC = () => {
   const { t } = useTranslation()
-
   return (
     <Page>
       <Hero>
@@ -90,7 +89,7 @@ const Home: React.FC = () => {
       <div>
         <Cards>
           <FarmStakingCard />
-          <LotteryCard />
+          <EnergyChart />
         </Cards>
         <CTACards>
           <EarnAPRCard />

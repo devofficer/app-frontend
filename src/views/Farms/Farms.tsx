@@ -42,16 +42,6 @@ const ControlContainer = styled.div`
   }
 `
 
-const ToggleWrapper = styled.div`
-  display: flex;
-  align-items: center;
-  margin-left: 10px;
-
-  ${Text} {
-    margin-left: 8px;
-  }
-`
-
 const LabelWrapper = styled.div`
   > ${Text} {
     font-size: 12px;
@@ -102,7 +92,7 @@ const Farms: React.FC = () => {
   const { path } = useRouteMatch()
   const { pathname } = useLocation()
   const { t } = useTranslation()
-  const { data: farmsLP, userDataLoaded } = useFarms()
+  const { data: farmsLP } = useFarms()
   const cakePrice = usePriceCakeBusd()
   const [query, setQuery] = useState('')
   const { account } = useWeb3React()
