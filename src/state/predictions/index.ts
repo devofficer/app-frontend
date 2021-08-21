@@ -1,16 +1,23 @@
-/* eslint-disable no-param-reassign */
 import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit'
 import maxBy from 'lodash/maxBy'
 import merge from 'lodash/merge'
+import range from 'lodash/range'
 import { BIG_ZERO } from 'utils/bigNumber'
-import { Bet, HistoryFilter, Market, PredictionsState, PredictionStatus, Round } from 'state/types'
+import { Bet, LedgerData, HistoryFilter, PredictionsState, PredictionStatus, ReduxNodeRound } from 'state/types'
+import { getPredictionsContract } from 'utils/contractHelpers'
+import { FUTURE_ROUND_COUNT, PAST_ROUND_COUNT, ROUND_BUFFER } from './config'
 import {
-  makeFutureRoundResponse,
-  transformRoundResponse,
   getBetHistory,
   transformBetResponse,
-  getBet,
+  makeFutureRoundResponse,
   makeRoundData,
+  getRoundsData,
+  getPredictionData,
+  MarketData,
+  getLedgerData,
+  makeLedgerData,
+  serializePredictionsRoundsResponse,
+  getClaimStatuses,
 } from './helpers'
 
 const initialState: PredictionsState = {
@@ -21,59 +28,120 @@ const initialState: PredictionsState = {
   isFetchingHistory: false,
   historyFilter: HistoryFilter.ALL,
   currentEpoch: 0,
-  currentRoundStartBlockNumber: 0,
-  intervalBlocks: 100,
-  bufferBlocks: 2,
-  minBetAmount: '1000000000000000',
+  intervalSeconds: 300,
+  minBetAmount: '10000000000000',
+  bufferSeconds: 60,
   lastOraclePrice: BIG_ZERO.toJSON(),
   rounds: {},
   history: {},
-  bets: {},
+  ledgers: {},
+  claimableStatuses: {},
 }
 
 // Thunks
-export const fetchBet = createAsyncThunk<{ account: string; bet: Bet }, { account: string; id: string }>(
-  'predictions/fetchBet',
-  async ({ account, id }) => {
-    const response = await getBet(id)
-    const bet = transformBetResponse(response)
-    return { account, bet }
+// V2 REFACTOR
+type PredictionInitialization = Pick<
+  PredictionsState,
+  | 'status'
+  | 'currentEpoch'
+  | 'intervalSeconds'
+  | 'minBetAmount'
+  | 'rounds'
+  | 'ledgers'
+  | 'claimableStatuses'
+  | 'bufferSeconds'
+>
+export const initializePredictions = createAsyncThunk<PredictionInitialization, string>(
+  'predictions/intialize',
+  async (account = null) => {
+    // Static values
+    const marketData = await getPredictionData()
+    const epochs =
+      marketData.currentEpoch > PAST_ROUND_COUNT
+        ? range(marketData.currentEpoch, marketData.currentEpoch - PAST_ROUND_COUNT)
+        : [marketData.currentEpoch]
+
+    // Round data
+    const roundsResponse = await getRoundsData(epochs)
+    const initialRoundData: { [key: string]: ReduxNodeRound } = roundsResponse.reduce((accum, roundResponse) => {
+      const reduxNodeRound = serializePredictionsRoundsResponse(roundResponse)
+
+      return {
+        ...accum,
+        [reduxNodeRound.epoch.toString()]: reduxNodeRound,
+      }
+    }, {})
+
+    const initializedData = {
+      ...marketData,
+      rounds: initialRoundData,
+      ledgers: {},
+      claimableStatuses: {},
+    }
+
+    if (!account) {
+      return initializedData
+    }
+
+    // Bet data
+    const ledgerResponses = await getLedgerData(account, epochs)
+
+    // Claim statuses
+    const claimableStatuses = await getClaimStatuses(account, epochs)
+
+    return merge({}, initializedData, {
+      ledgers: makeLedgerData(account, ledgerResponses, epochs),
+      claimableStatuses,
+    })
   },
 )
 
-export const fetchRoundBet = createAsyncThunk<
-  { account: string; roundId: string; bet: Bet },
-  { account: string; roundId: string }
->('predictions/fetchRoundBet', async ({ account, roundId }) => {
-  const betResponses = await getBetHistory({
-    user: account.toLowerCase(),
-    round: roundId,
-  })
-
-  // This should always return 0 or 1 bet because a user can only place
-  // one bet per round
-  if (betResponses && betResponses.length === 1) {
-    const [betResponse] = betResponses
-    return { account, roundId, bet: transformBetResponse(betResponse) }
-  }
-
-  return { account, roundId, bet: null }
+export const fetchRound = createAsyncThunk<ReduxNodeRound, number>('predictions/fetchRound', async (epoch) => {
+  const predictionContract = getPredictionsContract()
+  const response = await predictionContract.rounds(epoch)
+  return serializePredictionsRoundsResponse(response)
 })
 
-/**
- * Used to poll the user bets of the current round cards
- */
-export const fetchCurrentBets = createAsyncThunk<
-  { account: string; bets: Bet[] },
-  { account: string; roundIds: string[] }
->('predictions/fetchCurrentBets', async ({ account, roundIds }) => {
-  const betResponses = await getBetHistory({
-    user: account.toLowerCase(),
-    round_in: roundIds,
-  })
+export const fetchRounds = createAsyncThunk<{ [key: string]: ReduxNodeRound }, number[]>(
+  'predictions/fetchRounds',
+  async (epochs) => {
+    const rounds = await getRoundsData(epochs)
+    return rounds.reduce((accum, round) => {
+      if (!round) {
+        return accum
+      }
 
-  return { account, bets: betResponses.map(transformBetResponse) }
+      const reduxNodeRound = serializePredictionsRoundsResponse(round)
+
+      return {
+        ...accum,
+        [reduxNodeRound.epoch.toString()]: reduxNodeRound,
+      }
+    }, {})
+  },
+)
+
+export const fetchMarketData = createAsyncThunk<MarketData>('predictions/fetchMarketData', async () => {
+  const marketData = await getPredictionData()
+  return marketData
 })
+
+export const fetchLedgerData = createAsyncThunk<LedgerData, { account: string; epochs: number[] }>(
+  'predictions/fetchLedgerData',
+  async ({ account, epochs }) => {
+    const ledgers = await getLedgerData(account, epochs)
+    return makeLedgerData(account, ledgers, epochs)
+  },
+)
+
+export const fetchClaimableStatuses = createAsyncThunk<
+  PredictionsState['claimableStatuses'],
+  { account: string; epochs: number[] }
+>('predictions/fetchClaimableStatuses', async ({ account, epochs }) => {
+  const ledgers = await getClaimStatuses(account, epochs)
+  return ledgers
+})
+// END V2 REFACTOR
 
 export const fetchHistory = createAsyncThunk<{ account: string; bets: Bet[] }, { account: string; claimed?: boolean }>(
   'predictions/fetchHistory',
@@ -105,93 +173,89 @@ export const predictionsSlice = createSlice({
     setHistoryFilter: (state, action: PayloadAction<HistoryFilter>) => {
       state.historyFilter = action.payload
     },
-    initialize: (state, action: PayloadAction<PredictionsState>) => {
-      return {
-        ...state,
-        ...action.payload,
-      }
-    },
-    updateMarketData: (state, action: PayloadAction<{ rounds: Round[]; market: Market }>) => {
-      const { rounds, market } = action.payload
-      const newRoundData = makeRoundData(rounds)
-      const incomingCurrentRound = maxBy(rounds, 'epoch')
-
-      if (state.currentEpoch !== incomingCurrentRound.epoch) {
-        // Add new round
-        const newestRound = maxBy(rounds, 'epoch') as Round
-        const futureRound = transformRoundResponse(
-          makeFutureRoundResponse(newestRound.epoch + 2, newestRound.startBlock + state.intervalBlocks),
-        )
-
-        newRoundData[futureRound.id] = futureRound
-      }
-
-      state.currentEpoch = incomingCurrentRound.epoch
-      state.currentRoundStartBlockNumber = incomingCurrentRound.startBlock
-      state.status = market.paused ? PredictionStatus.PAUSED : PredictionStatus.LIVE
-      state.rounds = { ...state.rounds, ...newRoundData }
-    },
     setCurrentEpoch: (state, action: PayloadAction<number>) => {
       state.currentEpoch = action.payload
-    },
-    markBetAsCollected: (state, action: PayloadAction<{ account: string; roundId: string }>) => {
-      const { account, roundId } = action.payload
-      const accountBets = state.bets[account]
-
-      if (accountBets && accountBets[roundId]) {
-        accountBets[roundId].claimed = true
-      }
-    },
-    markPositionAsEntered: (state, action: PayloadAction<{ account: string; roundId: string; bet: Bet }>) => {
-      const { account, roundId, bet } = action.payload
-
-      state.bets = {
-        ...state.bets,
-        [account]: {
-          ...state.bets[account],
-          [roundId]: bet,
-        },
-      }
     },
     setLastOraclePrice: (state, action: PayloadAction<string>) => {
       state.lastOraclePrice = action.payload
     },
+    markBetHistoryAsCollected: (state, action: PayloadAction<{ account: string; betId: string }>) => {
+      const { account, betId } = action.payload
+
+      if (state.history[account]) {
+        const betIndex = state.history[account].findIndex((bet) => bet.id === betId)
+
+        if (betIndex >= 0) {
+          state.history[account][betIndex].claimed = true
+        }
+      }
+    },
   },
   extraReducers: (builder) => {
-    // Get unclaimed bets
-    builder.addCase(fetchCurrentBets.fulfilled, (state, action) => {
-      const { account, bets } = action.payload
-      const betData = bets.reduce((accum, bet) => {
-        return {
-          ...accum,
-          [bet.round.id]: bet,
-        }
-      }, {})
-
-      state.bets = merge({}, state.bets, {
-        [account]: betData,
-      })
+    // Claimable statuses
+    builder.addCase(fetchClaimableStatuses.fulfilled, (state, action) => {
+      state.claimableStatuses = merge({}, state.claimableStatuses, action.payload)
     })
 
-    // Get round bet
-    builder.addCase(fetchRoundBet.fulfilled, (state, action) => {
-      const { account, roundId, bet } = action.payload
+    // Ledger (bet) records
+    builder.addCase(fetchLedgerData.fulfilled, (state, action) => {
+      state.ledgers = merge({}, state.ledgers, action.payload)
+    })
 
-      if (bet) {
-        state.bets = {
-          ...state.bets,
-          [account]: {
-            ...state.bets[account],
-            [roundId]: bet,
-          },
-        }
+    // Get static market data
+    builder.addCase(fetchMarketData.fulfilled, (state, action) => {
+      const { status, currentEpoch, intervalSeconds, minBetAmount } = action.payload
+
+      // If the round has change add a new future round
+      if (state.currentEpoch !== currentEpoch) {
+        const newestRound = maxBy(Object.values(state.rounds), 'epoch')
+        const futureRound = makeFutureRoundResponse(
+          newestRound.epoch + 1,
+          newestRound.startTimestamp + intervalSeconds + ROUND_BUFFER,
+        )
+
+        state.rounds[futureRound.epoch] = futureRound
+      }
+
+      state.status = status
+      state.currentEpoch = currentEpoch
+      state.intervalSeconds = intervalSeconds
+      state.minBetAmount = minBetAmount
+    })
+
+    // Initialize predictions
+    builder.addCase(initializePredictions.fulfilled, (state, action) => {
+      const { status, currentEpoch, intervalSeconds, bufferSeconds, rounds, claimableStatuses, ledgers } =
+        action.payload
+      const futureRounds: ReduxNodeRound[] = []
+      const currentRound = rounds[currentEpoch]
+
+      for (let i = 1; i <= FUTURE_ROUND_COUNT; i++) {
+        futureRounds.push(makeFutureRoundResponse(currentEpoch + i, currentRound.startTimestamp + intervalSeconds * i))
+      }
+
+      return {
+        ...state,
+        status,
+        currentEpoch,
+        intervalSeconds,
+        bufferSeconds,
+        claimableStatuses,
+        ledgers,
+        rounds: merge({}, rounds, makeRoundData(futureRounds)),
       }
     })
 
-    // Update Bet
-    builder.addCase(fetchBet.fulfilled, (state, action) => {
-      const { account, bet } = action.payload
-      state.history[account] = [...state.history[account].filter((currentBet) => currentBet.id !== bet.id), bet]
+    // Get single round
+    builder.addCase(fetchRound.fulfilled, (state, action) => {
+      state.rounds = merge({}, state.rounds, {
+        [action.payload.epoch.toString()]: action.payload,
+      })
+    })
+
+    // Get multiple rounds
+    builder.addCase(fetchRounds.fulfilled, (state, action) => {
+      state.rounds = merge({}, state.rounds, action.payload)
     })
 
     // Show History
@@ -200,42 +264,25 @@ export const predictionsSlice = createSlice({
     })
     builder.addCase(fetchHistory.rejected, (state) => {
       state.isFetchingHistory = false
-      state.isHistoryPaneOpen = true
     })
     builder.addCase(fetchHistory.fulfilled, (state, action) => {
       const { account, bets } = action.payload
 
       state.isFetchingHistory = false
-      state.isHistoryPaneOpen = true
       state.history[account] = bets
-
-      // Save any fetched bets in the "bets" namespace
-      const betData = bets.reduce((accum, bet) => {
-        return {
-          ...accum,
-          [bet.round.id]: bet,
-        }
-      }, {})
-
-      state.bets = merge({}, state.bets, {
-        [account]: betData,
-      })
     })
   },
 })
 
 // Actions
 export const {
-  initialize,
   setChartPaneState,
   setCurrentEpoch,
   setHistoryFilter,
   setHistoryPaneState,
-  updateMarketData,
-  markBetAsCollected,
   setPredictionStatus,
-  markPositionAsEntered,
   setLastOraclePrice,
+  markBetHistoryAsCollected,
 } = predictionsSlice.actions
 
 export default predictionsSlice.reducer

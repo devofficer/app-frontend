@@ -9,6 +9,7 @@ import { useCake, useBunnyFactory } from 'hooks/useContract'
 import { Nft } from 'config/constants/types'
 import useHasCakeBalance from 'hooks/useHasCakeBalance'
 import nftList from 'config/constants/nfts'
+import { useCallWithGasPrice } from 'hooks/useCallWithGasPrice'
 import SelectionCard from '../components/SelectionCard'
 import NextStepButton from '../components/NextStepButton'
 import ApproveConfirmButtons from '../components/ApproveConfirmButtons'
@@ -27,39 +28,33 @@ const Mint: React.FC = () => {
   const bunnyFactoryContract = useBunnyFactory()
   const { t } = useTranslation()
   const hasMinimumCakeRequired = useHasCakeBalance(minimumCakeBalanceToMint)
-  const {
-    isApproving,
-    isApproved,
-    isConfirmed,
-    isConfirming,
-    handleApprove,
-    handleConfirm,
-  } = useApproveConfirmTransaction({
-    onRequiresApproval: async () => {
-      // TODO: Move this to a helper, this check will be probably be used many times
-      try {
-        const response = await cakeContract.methods.allowance(account, bunnyFactoryContract.options.address).call()
-        const currentAllowance = new BigNumber(response)
-        return currentAllowance.gte(minimumCakeRequired)
-      } catch (error) {
-        return false
-      }
-    },
-    onApprove: () => {
-      return cakeContract.methods
-        .approve(bunnyFactoryContract.options.address, allowance.toJSON())
-        .send({ from: account })
-    },
-    onConfirm: () => {
-      return bunnyFactoryContract.methods.mintNFT(variationId).send({ from: account })
-    },
-    onSuccess: () => actions.nextStep(),
-  })
+  const { callWithGasPrice } = useCallWithGasPrice()
+
+  const { isApproving, isApproved, isConfirmed, isConfirming, handleApprove, handleConfirm } =
+    useApproveConfirmTransaction({
+      onRequiresApproval: async () => {
+        // TODO: Move this to a helper, this check will be probably be used many times
+        try {
+          const response = await cakeContract.allowance(account, bunnyFactoryContract.address)
+          const currentAllowance = new BigNumber(response.toString())
+          return currentAllowance.gte(minimumCakeRequired)
+        } catch (error) {
+          return false
+        }
+      },
+      onApprove: () => {
+        return callWithGasPrice(cakeContract, 'approve', [bunnyFactoryContract.address, allowance.toJSON()])
+      },
+      onConfirm: () => {
+        return callWithGasPrice(bunnyFactoryContract, 'mintNFT', [variationId])
+      },
+      onSuccess: () => actions.nextStep(),
+    })
 
   return (
     <>
       <Text fontSize="20px" color="textSubtle" bold>
-        {t(`Step ${1}`)}
+        {t('Step %num%', { num: 1 })}
       </Text>
       <Heading as="h3" scale="xl" mb="24px">
         {t('Get Starter Collectible')}
@@ -78,7 +73,7 @@ const Mint: React.FC = () => {
             {t('Choose wisely: you can only ever make one starter collectible!')}
           </Text>
           <Text as="p" mb="24px" color="textSubtle">
-            {t(`Cost: ${MINT_COST} CAKE`, { num: MINT_COST })}
+            {t('Cost: %num% CAKE', { num: MINT_COST })}
           </Text>
           {nfts.map((nft) => {
             const handleChange = (value: string) => setVariationId(Number(value))

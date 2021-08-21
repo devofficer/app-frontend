@@ -7,9 +7,9 @@ import { getFullDisplayBalance } from 'utils/formatBalance'
 import { getPancakeProfileAddress } from 'utils/addressHelpers'
 import { useCake } from 'hooks/useContract'
 import { useTranslation } from 'contexts/Localization'
-import useGetProfileCosts from 'hooks/useGetProfileCosts'
+import useGetProfileCosts from 'views/Profile/hooks/useGetProfileCosts'
 import useHasCakeBalance from 'hooks/useHasCakeBalance'
-import { useProfile } from 'state/hooks'
+import { useProfile } from 'state/profile/hooks'
 import { UseEditProfileResponse } from './reducer'
 import ProfileAvatar from '../ProfileAvatar'
 
@@ -57,8 +57,8 @@ const StartPage: React.FC<StartPageProps> = ({ goToApprove, goToChange, goToRemo
    */
   useEffect(() => {
     const checkApprovalStatus = async () => {
-      const response = await cakeContract.methods.allowance(account, getPancakeProfileAddress()).call()
-      const currentAllowance = new BigNumber(response)
+      const response = await cakeContract.allowance(account, getPancakeProfileAddress())
+      const currentAllowance = new BigNumber(response.toString())
       setNeedsApproval(currentAllowance.lt(cost))
     }
 
@@ -79,7 +79,7 @@ const StartPage: React.FC<StartPageProps> = ({ goToApprove, goToChange, goToRemo
       <Flex alignItems="center" style={{ height: '48px' }} justifyContent="center">
         <Text as="p" color="failure">
           {!hasMinimumCakeRequired &&
-            t(`${getFullDisplayBalance(minimumCakeRequired)} CAKE required to change profile pic`)}
+            t('%minimum% CAKE required to change profile pic', { minimum: getFullDisplayBalance(minimumCakeRequired) })}
         </Text>
       </Flex>
       {profile.isActive ? (

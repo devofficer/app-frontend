@@ -1,4 +1,3 @@
-/* eslint-disable no-param-reassign */
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 import { ProfileState } from 'state/types'
 import type { AppDispatch } from 'state'
@@ -43,13 +42,8 @@ export const profileSlice = createSlice({
 })
 
 // Actions
-export const {
-  profileFetchStart,
-  profileFetchSucceeded,
-  profileFetchFailed,
-  profileClear,
-  addPoints,
-} = profileSlice.actions
+export const { profileFetchStart, profileFetchSucceeded, profileFetchFailed, profileClear, addPoints } =
+  profileSlice.actions
 
 // Thunks
 // TODO: this should be an AsyncThunk

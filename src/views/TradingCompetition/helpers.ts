@@ -1,5 +1,5 @@
 import { ReactText } from 'react'
-import { usePriceCakeBusd } from 'state/hooks'
+import { usePriceCakeBusd } from 'state/farms/hooks'
 import { getBalanceNumber } from 'utils/formatBalance'
 import easterPrizes from 'config/constants/trading-competition/easter'
 import BigNumber from 'bignumber.js'
@@ -8,14 +8,14 @@ export const localiseTradingVolume = (value: number, decimals = 0) => {
   return value.toLocaleString('en-US', { maximumFractionDigits: decimals })
 }
 
-export const accountEllipsis = (account: string) =>
-  `${account.substring(0, 4)}...${account.substring(account.length - 4)}`
-
 export const useCompetitionCakeRewards = (userCakeReward: ReactText) => {
   const cakeAsBigNumber = new BigNumber(userCakeReward as string)
   const cakeBalance = getBalanceNumber(cakeAsBigNumber)
   const cakePriceBusd = usePriceCakeBusd()
-  return { cakeReward: cakeBalance, dollarValueOfCakeReward: cakeBalance * cakePriceBusd.toNumber() }
+  return {
+    cakeReward: cakeBalance,
+    dollarValueOfCakeReward: cakePriceBusd.gt(0) ? cakeBalance * cakePriceBusd.toNumber() : null,
+  }
 }
 
 // 1 is a reasonable teamRank default: accessing the first team in the config.

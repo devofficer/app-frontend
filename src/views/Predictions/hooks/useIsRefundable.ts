@@ -1,19 +1,20 @@
 import { useEffect, useState } from 'react'
-import { usePredictionsContract } from 'hooks/useContract'
 import { useWeb3React } from '@web3-react/core'
+import { getPredictionsContract } from 'utils/contractHelpers'
 
 const useIsRefundable = (epoch: number) => {
   const [isRefundable, setIsRefundable] = useState(false)
-  const predictionsContract = usePredictionsContract()
   const { account } = useWeb3React()
 
   useEffect(() => {
     const fetchRefundableStatus = async () => {
-      const canClaim = await predictionsContract.methods.claimable(epoch, account).call()
+      const predictionsContract = getPredictionsContract()
+      const refundable = await predictionsContract.refundable(epoch, account)
 
-      if (canClaim) {
-        const refundable = await predictionsContract.methods.refundable(epoch, account).call()
-        setIsRefundable(refundable)
+      if (refundable) {
+        // Double check they have not already claimed
+        const ledger = await predictionsContract.ledger(epoch, account)
+        setIsRefundable(ledger.claimed === false)
       } else {
         setIsRefundable(false)
       }
@@ -22,7 +23,7 @@ const useIsRefundable = (epoch: number) => {
     if (account) {
       fetchRefundableStatus()
     }
-  }, [account, epoch, predictionsContract, setIsRefundable])
+  }, [account, epoch, setIsRefundable])
 
   return { isRefundable, setIsRefundable }
 }

@@ -1,27 +1,33 @@
 import React from 'react'
 import { useWeb3React } from '@web3-react/core'
-import { useGetBetByRoundId, useGetCurrentEpoch } from 'state/hooks'
-import { BetPosition, Round } from 'state/types'
-import { getMultiplier } from '../../helpers'
+import { useGetBetByEpoch, useGetCurrentEpoch } from 'state/predictions/hooks'
+import { BetPosition, NodeRound } from 'state/types'
+import { getMultiplierv2 } from '../../helpers'
 import ExpiredRoundCard from './ExpiredRoundCard'
 import LiveRoundCard from './LiveRoundCard'
 import OpenRoundCard from './OpenRoundCard'
 import SoonRoundCard from './SoonRoundCard'
 
 interface RoundCardProps {
-  round: Round
+  round: NodeRound
 }
 
 const RoundCard: React.FC<RoundCardProps> = ({ round }) => {
-  const { id, epoch, lockPrice, closePrice, totalAmount, bullAmount, bearAmount } = round
+  const { epoch, lockPrice, closePrice, totalAmount, bullAmount, bearAmount } = round
   const currentEpoch = useGetCurrentEpoch()
   const { account } = useWeb3React()
-  const bet = useGetBetByRoundId(account, id)
-  const hasEntered = bet !== null
-  const hasEnteredUp = hasEntered && bet.position === BetPosition.BULL
-  const hasEnteredDown = hasEntered && bet.position === BetPosition.BEAR
-  const bullMultiplier = getMultiplier(totalAmount, bullAmount)
-  const bearMultiplier = getMultiplier(totalAmount, bearAmount)
+  const ledger = useGetBetByEpoch(account, epoch)
+  const hasEntered = ledger ? ledger.amount.gt(0) : false
+  const hasEnteredUp = hasEntered && ledger.position === BetPosition.BULL
+  const hasEnteredDown = hasEntered && ledger.position === BetPosition.BEAR
+  const hasClaimedUp = hasEntered && ledger.claimed && ledger.position === BetPosition.BULL
+  const hasClaimedDown = hasEntered && ledger.claimed && ledger.position === BetPosition.BEAR
+
+  const bullMultiplier = getMultiplierv2(totalAmount, bullAmount)
+  const bearMultiplier = getMultiplierv2(totalAmount, bearAmount)
+
+  const formattedBullMultiplier = bullMultiplier.toUnsafeFloat().toFixed(bullMultiplier.isZero() ? 0 : 2)
+  const formattedBearMultiplier = bearMultiplier.toUnsafeFloat().toFixed(bearMultiplier.isZero() ? 0 : 2)
 
   // Next (open) round
   if (epoch === currentEpoch && lockPrice === null) {
@@ -30,9 +36,9 @@ const RoundCard: React.FC<RoundCardProps> = ({ round }) => {
         round={round}
         hasEnteredDown={hasEnteredDown}
         hasEnteredUp={hasEnteredUp}
-        betAmount={bet?.amount}
-        bullMultiplier={bullMultiplier}
-        bearMultiplier={bearMultiplier}
+        betAmount={ledger?.amount}
+        bullMultiplier={formattedBullMultiplier}
+        bearMultiplier={formattedBearMultiplier}
       />
     )
   }
@@ -41,12 +47,12 @@ const RoundCard: React.FC<RoundCardProps> = ({ round }) => {
   if (closePrice === null && epoch === currentEpoch - 1) {
     return (
       <LiveRoundCard
-        betAmount={bet?.amount}
+        betAmount={ledger?.amount}
         hasEnteredDown={hasEnteredDown}
         hasEnteredUp={hasEnteredUp}
         round={round}
-        bullMultiplier={bullMultiplier}
-        bearMultiplier={bearMultiplier}
+        bullMultiplier={formattedBullMultiplier}
+        bearMultiplier={formattedBearMultiplier}
       />
     )
   }
@@ -62,9 +68,11 @@ const RoundCard: React.FC<RoundCardProps> = ({ round }) => {
       round={round}
       hasEnteredDown={hasEnteredDown}
       hasEnteredUp={hasEnteredUp}
-      betAmount={bet?.amount}
-      bullMultiplier={bullMultiplier}
-      bearMultiplier={bearMultiplier}
+      hasClaimedDown={hasClaimedDown}
+      hasClaimedUp={hasClaimedUp}
+      betAmount={ledger?.amount}
+      bullMultiplier={formattedBullMultiplier}
+      bearMultiplier={formattedBearMultiplier}
     />
   )
 }

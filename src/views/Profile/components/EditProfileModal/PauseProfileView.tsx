@@ -1,14 +1,15 @@
 import React, { useState } from 'react'
 import { AutoRenewIcon, Button, Checkbox, Flex, InjectedModalProps, Text } from '@pancakeswap/uikit'
 import { useTranslation } from 'contexts/Localization'
-import useGetProfileCosts from 'hooks/useGetProfileCosts'
+import useGetProfileCosts from 'views/Profile/hooks/useGetProfileCosts'
 import { useAppDispatch } from 'state'
-import { useProfile } from 'state/hooks'
+import { useProfile } from 'state/profile/hooks'
 import { fetchProfile } from 'state/profile'
 import useToast from 'hooks/useToast'
 import { getBalanceNumber } from 'utils/formatBalance'
 import { useProfile as useProfileContract } from 'hooks/useContract'
 import { useWeb3React } from '@web3-react/core'
+import { useCallWithGasPrice } from 'hooks/useCallWithGasPrice'
 
 type PauseProfilePageProps = InjectedModalProps
 
@@ -19,30 +20,26 @@ const PauseProfilePage: React.FC<PauseProfilePageProps> = ({ onDismiss }) => {
   const { numberCakeToReactivate } = useGetProfileCosts()
   const { t } = useTranslation()
   const pancakeProfileContract = useProfileContract()
+  const { callWithGasPrice } = useCallWithGasPrice()
   const { account } = useWeb3React()
   const { toastSuccess, toastError } = useToast()
   const dispatch = useAppDispatch()
 
   const handleChange = () => setIsAcknowledged(!isAcknowledged)
 
-  const handleDeactivateProfile = () => {
-    pancakeProfileContract.methods
-      .pauseProfile()
-      .send({ from: account })
-      .on('sending', () => {
-        setIsConfirming(true)
-      })
-      .on('receipt', async () => {
-        // Re-fetch profile
-        await dispatch(fetchProfile(account))
-        toastSuccess('Profile Paused!')
-
-        onDismiss()
-      })
-      .on('error', (error) => {
-        toastError('Error', error?.message)
-        setIsConfirming(false)
-      })
+  const handleDeactivateProfile = async () => {
+    const tx = await callWithGasPrice(pancakeProfileContract, 'pauseProfile')
+    setIsConfirming(true)
+    const receipt = await tx.wait()
+    if (receipt.status) {
+      // Re-fetch profile
+      await dispatch(fetchProfile(account))
+      toastSuccess(t('Profile Paused!'))
+      onDismiss()
+    } else {
+      toastError(t('Error'), t('Please try again. Confirm the transaction and make sure you are paying enough gas!'))
+      setIsConfirming(false)
+    }
   }
 
   if (!profile) {
@@ -60,7 +57,7 @@ const PauseProfilePage: React.FC<PauseProfilePageProps> = ({ onDismiss }) => {
         )}
       </Text>
       <Text as="p" color="textSubtle" mb="24px">
-        {t(`Cost to reactivate in future: ${getBalanceNumber(numberCakeToReactivate)} CAKE`)}
+        {t('Cost to reactivate in the future: %cost% CAKE', { cost: getBalanceNumber(numberCakeToReactivate) })}
       </Text>
       <label htmlFor="acknowledgement" style={{ cursor: 'pointer', display: 'block', marginBottom: '24px' }}>
         <Flex alignItems="center">

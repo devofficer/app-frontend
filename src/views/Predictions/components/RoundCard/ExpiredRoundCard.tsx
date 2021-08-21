@@ -1,25 +1,29 @@
 import React from 'react'
 import styled from 'styled-components'
 import { useWeb3React } from '@web3-react/core'
-import { Box, BlockIcon, CardBody } from '@pancakeswap/uikit'
+import { Card, Box, BlockIcon, CardBody } from '@pancakeswap/uikit'
 import { useTranslation } from 'contexts/Localization'
-import { Round, BetPosition } from 'state/types'
-import { useGetBetByRoundId } from 'state/hooks'
+import { NodeRound, BetPosition, NodeLedger } from 'state/types'
+import { useGetBetByEpoch, useGetBufferSeconds } from 'state/predictions/hooks'
+import { formatBigNumberToFixed } from 'utils/formatBalance'
+import useTheme from 'hooks/useTheme'
+import { getHasRoundFailed, getNetPayoutv2 } from '../../helpers'
 import { RoundResult } from '../RoundResult'
-import { getPayout } from '../../helpers'
 import MultiplierArrow from './MultiplierArrow'
-import Card from './Card'
-import CardHeader from './CardHeader'
+import CardHeader, { getBorderBackground } from './CardHeader'
 import CollectWinningsOverlay from './CollectWinningsOverlay'
 import CanceledRoundCard from './CanceledRoundCard'
+import CalculatingCard from './CalculatingCard'
 
 interface ExpiredRoundCardProps {
-  round: Round
-  betAmount?: number
+  round: NodeRound
+  betAmount?: NodeLedger['amount']
   hasEnteredUp: boolean
   hasEnteredDown: boolean
-  bullMultiplier: number
-  bearMultiplier: number
+  hasClaimedUp: boolean
+  hasClaimedDown: boolean
+  bullMultiplier: string
+  bearMultiplier: string
 }
 
 const StyledExpiredRoundCard = styled(Card)`
@@ -36,50 +40,64 @@ const ExpiredRoundCard: React.FC<ExpiredRoundCardProps> = ({
   betAmount,
   hasEnteredUp,
   hasEnteredDown,
+  hasClaimedUp,
+  hasClaimedDown,
   bullMultiplier,
   bearMultiplier,
 }) => {
   const { t } = useTranslation()
+  const { theme } = useTheme()
   const { account } = useWeb3React()
-  const { id, epoch, endBlock, lockPrice, closePrice, bearAmount, bullAmount } = round
+  const { epoch, lockPrice, closePrice } = round
   const betPosition = closePrice > lockPrice ? BetPosition.BULL : BetPosition.BEAR
-  const bet = useGetBetByRoundId(account, round.id)
-  const payout = getPayout(bet)
+  const ledger = useGetBetByEpoch(account, epoch)
+  const bufferSeconds = useGetBufferSeconds()
+  const payout = getNetPayoutv2(ledger, round)
+  const formattedPayout = payout.toUnsafeFloat().toFixed(4)
+  const hasRoundFailed = getHasRoundFailed(round, bufferSeconds)
 
-  if (round.failed) {
+  if (hasRoundFailed) {
     return <CanceledRoundCard round={round} />
+  }
+
+  if (!closePrice) {
+    return <CalculatingCard round={round} hasEnteredDown={hasEnteredDown} hasEnteredUp={hasEnteredUp} />
   }
 
   return (
     <Box position="relative">
-      <StyledExpiredRoundCard>
+      <StyledExpiredRoundCard borderBackground={getBorderBackground(theme, 'expired')}>
         <CardHeader
           status="expired"
           icon={<BlockIcon mr="4px" width="21px" color="textDisabled" />}
           title={t('Expired')}
-          blockNumber={endBlock}
           epoch={round.epoch}
         />
         <CardBody p="16px" style={{ position: 'relative' }}>
           <MultiplierArrow
-            totalAmount={bullAmount}
             betAmount={betAmount}
             multiplier={bullMultiplier}
             isActive={betPosition === BetPosition.BULL}
             hasEntered={hasEnteredUp}
+            hasClaimed={hasClaimedUp}
           />
-          <RoundResult round={round} />
+          <RoundResult round={round} hasFailed={hasRoundFailed} />
           <MultiplierArrow
-            totalAmount={bearAmount}
             betAmount={betAmount}
             multiplier={bearMultiplier}
             betPosition={BetPosition.BEAR}
             isActive={betPosition === BetPosition.BEAR}
             hasEntered={hasEnteredDown}
+            hasClaimed={hasClaimedDown}
           />
         </CardBody>
       </StyledExpiredRoundCard>
-      <CollectWinningsOverlay roundId={id} epoch={epoch} payout={payout} isBottom={hasEnteredDown} />
+      <CollectWinningsOverlay
+        epoch={epoch}
+        payout={formattedPayout}
+        betAmount={betAmount ? formatBigNumberToFixed(betAmount, 4) : '0'}
+        isBottom={hasEnteredDown}
+      />
     </Box>
   )
 }

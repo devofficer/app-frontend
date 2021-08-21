@@ -1,5 +1,6 @@
 // Set of helper functions to facilitate wallet setup
 
+import { BASE_BSC_SCAN_URL, BASE_URL } from 'config'
 import { nodes } from './getRpcUrl'
 
 /**
@@ -7,7 +8,7 @@ import { nodes } from './getRpcUrl'
  * @returns {boolean} true if the setup succeeded, false otherwise
  */
 export const setupNetwork = async () => {
-  const provider = (window as WindowChain).ethereum
+  const provider = window.ethereum
   if (provider) {
     const chainId = parseInt(process.env.REACT_APP_CHAIN_ID, 10)
     try {
@@ -23,13 +24,13 @@ export const setupNetwork = async () => {
               decimals: 18,
             },
             rpcUrls: nodes,
-            blockExplorerUrls: ['https://bscscan.com/'],
+            blockExplorerUrls: [`${BASE_BSC_SCAN_URL}/`],
           },
         ],
       })
       return true
     } catch (error) {
-      console.error(error)
+      console.error('Failed to setup the network in Metamask:', error)
       return false
     }
   } else {
@@ -43,16 +44,10 @@ export const setupNetwork = async () => {
  * @param tokenAddress
  * @param tokenSymbol
  * @param tokenDecimals
- * @param tokenImage
  * @returns {boolean} true if the token has been added, false otherwise
  */
-export const registerToken = async (
-  tokenAddress: string,
-  tokenSymbol: string,
-  tokenDecimals: number,
-  tokenImage: string,
-) => {
-  const tokenAdded = await (window as WindowChain).ethereum.request({
+export const registerToken = async (tokenAddress: string, tokenSymbol: string, tokenDecimals: number) => {
+  const tokenAdded = await window.ethereum.request({
     method: 'wallet_watchAsset',
     params: {
       type: 'ERC20',
@@ -60,7 +55,7 @@ export const registerToken = async (
         address: tokenAddress,
         symbol: tokenSymbol,
         decimals: tokenDecimals,
-        image: tokenImage,
+        image: `${BASE_URL}/images/tokens/${tokenAddress}.png`,
       },
     },
   })

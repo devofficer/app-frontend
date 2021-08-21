@@ -1,7 +1,6 @@
 import React, { useState } from 'react'
-import { PromiEvent } from 'web3-core'
-import { Contract } from 'web3-eth-contract'
 import styled from 'styled-components'
+import { ethers } from 'ethers'
 import {
   Card,
   CardBody,
@@ -14,7 +13,7 @@ import {
   CardFooter,
   useModal,
 } from '@pancakeswap/uikit'
-import { useProfile } from 'state/hooks'
+import { useProfile } from 'state/profile/hooks'
 import { useTranslation } from 'contexts/Localization'
 import { Nft } from 'config/constants/types'
 import InfoRow from '../InfoRow'
@@ -26,7 +25,7 @@ export interface NftCardProps {
   nft: Nft
   canClaim?: boolean
   tokenIds?: number[]
-  onClaim?: () => PromiEvent<Contract>
+  onClaim?: () => Promise<ethers.providers.TransactionResponse>
   refresh: () => void
 }
 
@@ -107,7 +106,7 @@ const NftCard: React.FC<NftCardProps> = ({ nft, canClaim = false, tokenIds = [],
         {isOpen && (
           <InfoBlock>
             <Text as="p" color="textSubtle" style={{ textAlign: 'center' }}>
-              {description}
+              {t(description)}
             </Text>
           </InfoBlock>
         )}

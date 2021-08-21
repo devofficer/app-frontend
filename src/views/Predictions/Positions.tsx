@@ -3,12 +3,14 @@ import styled from 'styled-components'
 import SwiperCore, { Keyboard, Mousewheel } from 'swiper'
 import { Swiper, SwiperSlide } from 'swiper/react'
 import { Box } from '@pancakeswap/uikit'
-import { useGetSortedRounds } from 'state/hooks'
+import { useGetCurrentEpoch, useGetSortedRounds } from 'state/predictions/hooks'
 import 'swiper/swiper.min.css'
 import RoundCard from './components/RoundCard'
 import Menu from './components/Menu'
 import useSwiper from './hooks/useSwiper'
 import useOnNextRound from './hooks/useOnNextRound'
+import useOnViewChange from './hooks/useOnViewChange'
+import { PageView } from './types'
 
 SwiperCore.use([Keyboard, Mousewheel])
 
@@ -22,31 +24,37 @@ const StyledSwiper = styled.div`
     width: 320px;
   }
 `
-const Positions: React.FC = () => {
+const Positions: React.FC<{ view?: PageView }> = ({ view }) => {
   const { setSwiper } = useSwiper()
   const rounds = useGetSortedRounds()
-  const initialIndex = Math.floor(rounds.length / 2)
+  const currentEpoch = useGetCurrentEpoch()
+  const previousEpoch = currentEpoch > 0 ? currentEpoch - 1 : currentEpoch
+  const previousRound = rounds.find((round) => round.epoch === previousEpoch)
+  const swiperIndex = rounds.indexOf(previousRound)
 
   useOnNextRound()
+  useOnViewChange(swiperIndex, view)
 
   return (
-    <Box overflowX="hidden" overflowY="auto">
+    <Box overflow="hidden">
       <Menu />
       <StyledSwiper>
         <Swiper
-          initialSlide={initialIndex}
+          initialSlide={swiperIndex}
           onSwiper={setSwiper}
           spaceBetween={16}
           slidesPerView="auto"
           freeMode
           freeModeSticky
           centeredSlides
+          freeModeMomentumRatio={0.25}
+          freeModeMomentumVelocityRatio={0.5}
           mousewheel
           keyboard
           resizeObserver
         >
           {rounds.map((round) => (
-            <SwiperSlide key={round.id}>
+            <SwiperSlide key={round.epoch}>
               <RoundCard round={round} />
             </SwiperSlide>
           ))}

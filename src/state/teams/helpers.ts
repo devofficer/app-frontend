@@ -2,26 +2,23 @@ import merge from 'lodash/merge'
 import teamsList from 'config/constants/teams'
 import { getProfileContract } from 'utils/contractHelpers'
 import { Team } from 'config/constants/types'
-import makeBatchRequest from 'utils/makeBatchRequest'
-import { TeamsById, TeamResponse } from 'state/types'
+import { multicallv2 } from 'utils/multicall'
+import { TeamsById } from 'state/types'
+import profileABI from 'config/abi/pancakeProfile.json'
+import { getPancakeProfileAddress } from 'utils/addressHelpers'
 
 const profileContract = getProfileContract()
 
 export const getTeam = async (teamId: number): Promise<Team> => {
   try {
-    const {
-      0: teamName,
-      2: numberUsers,
-      3: numberPoints,
-      4: isJoinable,
-    } = await profileContract.methods.getTeamProfile(teamId).call()
+    const { 0: teamName, 2: numberUsers, 3: numberPoints, 4: isJoinable } = await profileContract.getTeamProfile(teamId)
     const staticTeamInfo = teamsList.find((staticTeam) => staticTeam.id === teamId)
 
     return merge({}, staticTeamInfo, {
       isJoinable,
       name: teamName,
-      users: numberUsers,
-      points: numberPoints,
+      users: numberUsers.toNumber(),
+      points: numberPoints.toNumber(),
     })
   } catch (error) {
     return null
@@ -39,14 +36,18 @@ export const getTeams = async (): Promise<TeamsById> => {
         [team.id]: team,
       }
     }, {})
-    const nbTeams = await profileContract.methods.numberTeams().call()
+    const nbTeams = await profileContract.numberTeams()
+
     const calls = []
-
     for (let i = 1; i <= nbTeams; i++) {
-      calls.push(profileContract.methods.getTeamProfile(i).call)
+      calls.push({
+        address: getPancakeProfileAddress(),
+        name: 'getTeamProfile',
+        params: [i],
+      })
     }
+    const teamData = await multicallv2(profileABI, calls)
 
-    const teamData = (await makeBatchRequest(calls)) as TeamResponse[]
     const onChainTeamData = teamData.reduce((accum, team, index) => {
       const { 0: teamName, 2: numberUsers, 3: numberPoints, 4: isJoinable } = team
 
@@ -54,8 +55,8 @@ export const getTeams = async (): Promise<TeamsById> => {
         ...accum,
         [index + 1]: {
           name: teamName,
-          users: Number(numberUsers),
-          points: Number(numberPoints),
+          users: numberUsers.toNumber(),
+          points: numberPoints.toNumber(),
           isJoinable,
         },
       }

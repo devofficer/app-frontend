@@ -1,20 +1,19 @@
 import React from 'react'
-import { useWeb3React } from '@web3-react/core'
 import { AutoRenewIcon, Button } from '@pancakeswap/uikit'
 import { PoolIds } from 'config/constants/types'
-import { WalletIfoData } from 'hooks/ifo/types'
+import { WalletIfoData } from 'views/Ifos/types'
 import { useTranslation } from 'contexts/Localization'
 import useToast from 'hooks/useToast'
 
 interface Props {
   poolId: PoolIds
+  ifoVersion: number
   walletIfoData: WalletIfoData
 }
 
-const ClaimButton: React.FC<Props> = ({ poolId, walletIfoData }) => {
+const ClaimButton: React.FC<Props> = ({ poolId, ifoVersion, walletIfoData }) => {
   const userPoolCharacteristics = walletIfoData[poolId]
   const { t } = useTranslation()
-  const { account } = useWeb3React()
   const { toastError, toastSuccess } = useToast()
 
   const setPendingTx = (isPending: boolean) => walletIfoData.setPendingTx(isPending, poolId)
@@ -22,11 +21,19 @@ const ClaimButton: React.FC<Props> = ({ poolId, walletIfoData }) => {
   const handleClaim = async () => {
     try {
       setPendingTx(true)
-      await walletIfoData.contract.methods.harvestPool(poolId === PoolIds.poolBasic ? 0 : 1).send({ from: account })
+
+      if (ifoVersion === 1) {
+        const tx = await walletIfoData.contract.harvest()
+        await tx.wait()
+      } else {
+        const tx = await walletIfoData.contract.harvestPool(poolId === PoolIds.poolBasic ? 0 : 1)
+        await tx.wait()
+      }
+
       walletIfoData.setIsClaimed(poolId)
-      toastSuccess('Success!', 'You have successfully claimed your rewards.')
+      toastSuccess(t('Success!'), t('You have successfully claimed your rewards.'))
     } catch (error) {
-      toastError('Error', error?.message)
+      toastError(t('Error'), t('Please try again. Confirm the transaction and make sure you are paying enough gas!'))
       console.error(error)
     } finally {
       setPendingTx(false)

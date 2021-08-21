@@ -19,7 +19,8 @@ import {
 import { parseISO, formatDistance } from 'date-fns'
 import { useWeb3React } from '@web3-react/core'
 import useToast from 'hooks/useToast'
-import useWeb3 from 'hooks/useWeb3'
+import { signMessage } from 'utils/web3React'
+import useWeb3Provider from 'hooks/useActiveWeb3React'
 import { useTranslation } from 'contexts/Localization'
 import useHasCakeBalance from 'hooks/useHasCakeBalance'
 import { DEFAULT_TOKEN_DECIMAL } from 'config'
@@ -61,9 +62,9 @@ const UserName: React.FC = () => {
   const [isAcknowledged, setIsAcknowledged] = useState(false)
   const { teamId, selectedNft, userName, actions, minimumCakeRequired, allowance } = useProfileCreation()
   const { t } = useTranslation()
-  const { account, library } = useWeb3React()
+  const { account } = useWeb3React()
   const { toastError } = useToast()
-  const web3 = useWeb3()
+  const { library } = useWeb3Provider()
   const [existingUserState, setExistingUserState] = useState<ExistingUserState>(ExistingUserState.IDLE)
   const [isValid, setIsValid] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
@@ -110,13 +111,7 @@ const UserName: React.FC = () => {
     try {
       setIsLoading(true)
 
-      const signature = library?.bnbSign
-        ? (await library.bnbSign(account, userName))?.signature
-        : // web3.utils.utf8ToHex("...") will not be called here on username if hex like string
-          // https://github.com/ChainSafe/web3.js/blob/5d027191c5cb7ffbcd44083528bdab19b4e14744/packages/web3-core-helpers/src/formatters.js#L225
-          // Last param is the password, and is null to request a signature in the wallet
-          await web3.eth.personal.sign(web3.utils.utf8ToHex(userName), account, null)
-
+      const signature = await signMessage(library, account, userName)
       const response = await fetch(`${profileApiUrl}/api/users/register`, {
         method: 'POST',
         headers: {
@@ -133,7 +128,7 @@ const UserName: React.FC = () => {
         setExistingUserState(ExistingUserState.CREATED)
       } else {
         const data = await response.json()
-        toastError(data?.error?.message)
+        toastError(t('Error'), data?.error?.message)
       }
     } catch (error) {
       toastError(error?.message ? error.message : JSON.stringify(error))
@@ -153,7 +148,7 @@ const UserName: React.FC = () => {
 
         if (response.ok) {
           const dateCreated = formatDistance(parseISO(data.created_at), new Date())
-          setMessage(`Created ${dateCreated} ago`)
+          setMessage(t('Created %dateCreated% ago', { dateCreated }))
 
           actions.setUserName(data.username)
           setExistingUserState(ExistingUserState.CREATED)
@@ -162,19 +157,19 @@ const UserName: React.FC = () => {
           setExistingUserState(ExistingUserState.NEW)
         }
       } catch (error) {
-        toastError('Error: Unable to verify username')
+        toastError(t('Error'), t('Unable to verify username'))
       }
     }
 
     if (account) {
       fetchUser()
     }
-  }, [account, setExistingUserState, setIsValid, setMessage, actions, toastError])
+  }, [account, setExistingUserState, setIsValid, setMessage, actions, toastError, t])
 
   return (
     <>
       <Text fontSize="20px" color="textSubtle" bold>
-        {t(`Step ${4}`)}
+        {t('Step %num%', { num: 4 })}
       </Text>
       <Heading as="h3" scale="xl" mb="24px">
         {t('Set Your Name')}
@@ -234,7 +229,11 @@ const UserName: React.FC = () => {
           </Button>
         </CardBody>
       </Card>
-      <Button onClick={onPresentConfirmProfileCreation} disabled={!isValid || !isUserCreated}>
+      <Button
+        onClick={onPresentConfirmProfileCreation}
+        disabled={!isValid || !isUserCreated}
+        id="completeProfileCreation"
+      >
         {t('Complete Profile')}
       </Button>
       {!hasMinimumCakeRequired && (

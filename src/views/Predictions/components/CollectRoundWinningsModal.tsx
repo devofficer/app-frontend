@@ -17,17 +17,18 @@ import {
   ModalCloseButton,
 } from '@pancakeswap/uikit'
 import { useWeb3React } from '@web3-react/core'
+import { getBscScanLink } from 'utils'
 import { useAppDispatch } from 'state'
-import { usePriceBnbBusd } from 'state/hooks'
-import { markBetAsCollected } from 'state/predictions'
+import { usePriceBnbBusd } from 'state/farms/hooks'
+import { fetchClaimableStatuses } from 'state/predictions'
 import { useTranslation } from 'contexts/Localization'
 import useToast from 'hooks/useToast'
 import { usePredictionsContract } from 'hooks/useContract'
-import { formatBnb } from '../helpers'
+import { useCallWithGasPrice } from 'hooks/useCallWithGasPrice'
 
 interface CollectRoundWinningsModalProps extends InjectedModalProps {
-  payout: number
-  roundId: string
+  payout: string
+  betAmount: string
   epoch: number
   onSuccess?: () => Promise<void>
 }
@@ -46,7 +47,7 @@ const BunnyDecoration = styled.div`
 
 const CollectRoundWinningsModal: React.FC<CollectRoundWinningsModalProps> = ({
   payout,
-  roundId,
+  betAmount,
   epoch,
   onDismiss,
   onSuccess,
@@ -55,44 +56,50 @@ const CollectRoundWinningsModal: React.FC<CollectRoundWinningsModalProps> = ({
   const { account } = useWeb3React()
   const { t } = useTranslation()
   const { toastSuccess, toastError } = useToast()
+  const { callWithGasPrice } = useCallWithGasPrice()
   const predictionsContract = usePredictionsContract()
   const bnbBusdPrice = usePriceBnbBusd()
   const dispatch = useAppDispatch()
 
-  const handleClick = () => {
-    predictionsContract.methods
-      .claim(epoch)
-      .send({ from: account })
-      .once('sending', () => {
-        setIsPendingTx(true)
-      })
-      .once('receipt', async (result) => {
-        if (onSuccess) {
-          await onSuccess()
-        }
+  // Convert payout to number for compatibility
+  const payoutAsFloat = parseFloat(payout)
+  const betAmountAsFloat = parseFloat(betAmount)
 
-        dispatch(markBetAsCollected({ account, roundId }))
-        onDismiss()
-        setIsPendingTx(false)
-        toastSuccess(
-          t('Winnings collected!'),
-          <Box>
-            <Text as="p" mb="8px">
-              {t('Your prizes have been sent to your wallet')}
-            </Text>
-            {result.transactionHash && (
-              <LinkExternal href={`https://bscscan.com/tx/${result.transactionHash}`}>
-                {t('View on BscScan')}
-              </LinkExternal>
-            )}
-          </Box>,
-        )
-      })
-      .once('error', (error) => {
-        setIsPendingTx(false)
-        toastError('Error', error?.message)
-        console.error(error)
-      })
+  const handleClick = async () => {
+    try {
+      const tx = await callWithGasPrice(predictionsContract, 'claim', [[epoch]])
+      setIsPendingTx(true)
+      const receipt = await tx.wait()
+
+      if (onSuccess) {
+        await onSuccess()
+      }
+
+      await dispatch(fetchClaimableStatuses({ account, epochs: [epoch] }))
+      onDismiss()
+      setIsPendingTx(false)
+      toastSuccess(
+        t('Winnings collected!'),
+        <Box>
+          <Text as="p" mb="8px">
+            {t('Your prizes have been sent to your wallet')}
+          </Text>
+          {receipt.transactionHash && (
+            <LinkExternal href={getBscScanLink(receipt.transactionHash, 'transaction')}>
+              {t('View on BscScan')}
+            </LinkExternal>
+          )}
+        </Box>,
+      )
+    } catch (error) {
+      console.error('Unable to claim winnings', error)
+      toastError(
+        t('Error'),
+        error?.data?.message || t('Please try again. Confirm the transaction and make sure you are paying enough gas!'),
+      )
+    } finally {
+      setIsPendingTx(false)
+    }
   }
 
   return (
@@ -108,12 +115,21 @@ const CollectRoundWinningsModal: React.FC<CollectRoundWinningsModalProps> = ({
       </ModalHeader>
       <ModalBody p="24px">
         <TrophyGoldIcon width="96px" mx="auto" mb="24px" />
-        <Flex alignItems="start" justifyContent="space-between" mb="24px">
-          <Text>{t('Collecting')}</Text>
+        <Flex alignItems="start" justifyContent="space-between" mb="8px">
+          <Text>{t('Your position')}</Text>
           <Box style={{ textAlign: 'right' }}>
-            <Text>{`${formatBnb(payout)} BNB`}</Text>
+            <Text>{`${betAmountAsFloat.toFixed(4)} BNB`}</Text>
             <Text fontSize="12px" color="textSubtle">
-              {`~$${formatBnb(bnbBusdPrice.times(payout).toNumber())}`}
+              {`~$${bnbBusdPrice.times(betAmountAsFloat).toFormat(2)}`}
+            </Text>
+          </Box>
+        </Flex>
+        <Flex alignItems="start" justifyContent="space-between" mb="24px">
+          <Text>{t('Your winnings')}</Text>
+          <Box style={{ textAlign: 'right' }}>
+            <Text>{`${payout} BNB`}</Text>
+            <Text fontSize="12px" color="textSubtle">
+              {`~$${bnbBusdPrice.times(payoutAsFloat).toFormat(2)}`}
             </Text>
           </Box>
         </Flex>

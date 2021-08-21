@@ -1,7 +1,6 @@
 import React, { useState } from 'react'
 import styled from 'styled-components'
-import { PromiEvent } from 'web3-core'
-import { Contract } from 'web3-eth-contract'
+import { ethers } from 'ethers'
 import { useWeb3React } from '@web3-react/core'
 import { Button, InjectedModalProps, Modal, Text, Flex, AutoRenewIcon } from '@pancakeswap/uikit'
 import { Nft } from 'config/constants/types'
@@ -11,7 +10,7 @@ import useToast from 'hooks/useToast'
 interface ClaimNftModalProps extends InjectedModalProps {
   nft: Nft
   onSuccess: () => void
-  onClaim: () => PromiEvent<Contract>
+  onClaim: () => Promise<ethers.providers.TransactionResponse>
 }
 
 const ModalContent = styled.div`
@@ -31,20 +30,19 @@ const ClaimNftModal: React.FC<ClaimNftModalProps> = ({ nft, onSuccess, onClaim, 
   const { toastError, toastSuccess } = useToast()
 
   const handleConfirm = async () => {
-    onClaim()
-      .once('sending', () => {
-        setIsConfirming(true)
-      })
-      .once('receipt', () => {
-        toastSuccess('Successfully claimed!')
+    setIsConfirming(true)
+    try {
+      const tx = await onClaim()
+      const receipt = await tx.wait()
+      if (receipt.status) {
+        toastSuccess(t('Successfully claimed!'))
         onDismiss()
         onSuccess()
-      })
-      .once('error', (error) => {
-        console.error('Unable to claim NFT', error)
-        toastError('Error', 'Unable to claim NFT, please try again.')
-        setIsConfirming(false)
-      })
+      }
+    } catch {
+      toastError(t('Error'), t('Please try again. Confirm the transaction and make sure you are paying enough gas!'))
+      setIsConfirming(false)
+    }
   }
 
   return (
@@ -52,7 +50,7 @@ const ClaimNftModal: React.FC<ClaimNftModalProps> = ({ nft, onSuccess, onClaim, 
       <ModalContent>
         <Flex alignItems="center" mb="8px" justifyContent="space-between">
           <Text>{t('You will receive')}:</Text>
-          <Text bold>{`1x "${nft.name}" Collectible`}</Text>
+          <Text bold>{t('1x %nftName% Collectible', { nftName: nft.name })}</Text>
         </Flex>
       </ModalContent>
       <Actions>

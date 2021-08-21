@@ -2,15 +2,22 @@
   "short_name": "GPNSwap",
   "name": "PancakeSwap",
   "description": "Farm on energy projects",
+  "homepage_url": "https://611beae09fa1e3092e8c0c9e--naughty-jackson-ebac88.netlify.app/",
+  "start_url": ".",
+  "display": "standalone",
+  "theme_color": "#000000",
+  "background_color": "#ffffff",
+  "orientation": "portrait",
   "icons": [
     {
       "src": "favicon.ico",
       "type": "image/x-icon",
       "sizes": "256x256"
+    },
+    {
+      "src": "logo.png",
+      "type": "image/png",
+      "sizes": "512x512"
     }
-  ],
-  "start_url": ".",
-  "display": "standalone",
-  "theme_color": "#000000",
-  "background_color": "#ffffff"
+  ]
 }

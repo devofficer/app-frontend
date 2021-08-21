@@ -2,13 +2,16 @@ import React, { useState } from 'react'
 import { Button, InjectedModalProps, Skeleton, Text } from '@pancakeswap/uikit'
 import { useWeb3React } from '@web3-react/core'
 import { useAppDispatch } from 'state'
-import { useGetCollectibles, useProfile } from 'state/hooks'
+import { useGetCollectibles } from 'state/collectibles/hooks'
+import { useProfile } from 'state/profile/hooks'
 import { useTranslation } from 'contexts/Localization'
 import useToast from 'hooks/useToast'
 import { fetchProfile } from 'state/profile'
 import { getAddressByType } from 'utils/collectibles'
 import useApproveConfirmTransaction from 'hooks/useApproveConfirmTransaction'
-import { useERC721, useProfile as useProfileContract } from 'hooks/useContract'
+import { getErc721Contract } from 'utils/contractHelpers'
+import { useProfile as useProfileContract } from 'hooks/useContract'
+import { useCallWithGasPrice } from 'hooks/useCallWithGasPrice'
 import { getPancakeProfileAddress } from 'utils/addressHelpers'
 import SelectionCard from '../SelectionCard'
 import ApproveConfirmButtons from '../ApproveConfirmButtons'
@@ -24,38 +27,32 @@ const ChangeProfilePicPage: React.FC<ChangeProfilePicPageProps> = ({ onDismiss }
   const { isLoading, tokenIds, nftsInWallet } = useGetCollectibles()
   const dispatch = useAppDispatch()
   const { profile } = useProfile()
-  const contract = useERC721(selectedNft.nftAddress)
   const profileContract = useProfileContract()
-  const { account } = useWeb3React()
+  const { account, library } = useWeb3React()
   const { toastSuccess } = useToast()
-  const {
-    isApproving,
-    isApproved,
-    isConfirmed,
-    isConfirming,
-    handleApprove,
-    handleConfirm,
-  } = useApproveConfirmTransaction({
-    onApprove: () => {
-      return contract.methods.approve(getPancakeProfileAddress(), selectedNft.tokenId).send({ from: account })
-    },
-    onConfirm: () => {
-      if (!profile.isActive) {
-        return profileContract.methods
-          .reactivateProfile(selectedNft.nftAddress, selectedNft.tokenId)
-          .send({ from: account })
-      }
+  const { callWithGasPrice } = useCallWithGasPrice()
 
-      return profileContract.methods.updateProfile(selectedNft.nftAddress, selectedNft.tokenId).send({ from: account })
-    },
-    onSuccess: async () => {
-      // Re-fetch profile
-      await dispatch(fetchProfile(account))
-      toastSuccess('Profile Updated!')
+  const { isApproving, isApproved, isConfirmed, isConfirming, handleApprove, handleConfirm } =
+    useApproveConfirmTransaction({
+      onApprove: () => {
+        const contract = getErc721Contract(selectedNft.nftAddress, library.getSigner())
+        return callWithGasPrice(contract, 'approve', [getPancakeProfileAddress(), selectedNft.tokenId])
+      },
+      onConfirm: () => {
+        if (!profile.isActive) {
+          return callWithGasPrice(profileContract, 'reactivateProfile', [selectedNft.nftAddress, selectedNft.tokenId])
+        }
 
-      onDismiss()
-    },
-  })
+        return callWithGasPrice(profileContract, 'updateProfile', [selectedNft.nftAddress, selectedNft.tokenId])
+      },
+      onSuccess: async () => {
+        // Re-fetch profile
+        await dispatch(fetchProfile(account))
+        toastSuccess(t('Profile Updated!'))
+
+        onDismiss()
+      },
+    })
 
   return (
     <>

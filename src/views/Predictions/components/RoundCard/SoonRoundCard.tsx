@@ -1,36 +1,30 @@
 import React from 'react'
-import { CardBody, Text, WaitIcon } from '@pancakeswap/uikit'
+import { Card, CardBody, Text, WaitIcon } from '@pancakeswap/uikit'
 import { useTranslation } from 'contexts/Localization'
-import { Round, BetPosition } from 'state/types'
-import { useGetCurrentEpoch, useGetTotalIntervalBlocks } from 'state/hooks'
+import { NodeRound, BetPosition } from 'state/types'
+import useTheme from 'hooks/useTheme'
+import { useGetIntervalSeconds } from 'state/predictions/hooks'
+import { ROUND_BUFFER } from 'state/predictions/config'
 import { formatRoundTime } from '../../helpers'
-import useRoundCountdown from '../../hooks/useRoundCountdown'
+import useCountdown from '../../hooks/useCountdown'
 import { RoundResultBox } from '../RoundResult'
 import MultiplierArrow from './MultiplierArrow'
-import Card from './Card'
-import CardHeader from './CardHeader'
+import CardHeader, { getBorderBackground } from './CardHeader'
 
 interface SoonRoundCardProps {
-  round: Round
+  round: NodeRound
 }
 
 const SoonRoundCard: React.FC<SoonRoundCardProps> = ({ round }) => {
+  const intervalSeconds = useGetIntervalSeconds()
+  const { secondsRemaining } = useCountdown(round.startTimestamp + intervalSeconds + ROUND_BUFFER)
+  const countdown = formatRoundTime(secondsRemaining)
   const { t } = useTranslation()
-  const interval = useGetTotalIntervalBlocks()
-  const currentEpoch = useGetCurrentEpoch()
-  const estimatedEndBlock = round.startBlock + interval
-  const seconds = useRoundCountdown(round.epoch - currentEpoch + 1)
-  const countdown = formatRoundTime(seconds)
+  const { theme } = useTheme()
 
   return (
-    <Card>
-      <CardHeader
-        status="soon"
-        icon={<WaitIcon mr="4px" width="21px" />}
-        title={t('Later')}
-        epoch={round.epoch}
-        blockNumber={estimatedEndBlock}
-      />
+    <Card borderBackground={getBorderBackground(theme, 'soon')}>
+      <CardHeader status="soon" icon={<WaitIcon mr="4px" width="21px" />} title={t('Later')} epoch={round.epoch} />
       <CardBody p="16px">
         <MultiplierArrow isDisabled />
         <RoundResultBox>

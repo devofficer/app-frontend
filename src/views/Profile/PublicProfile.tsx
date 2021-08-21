@@ -17,8 +17,9 @@ import {
   VisibilityOff,
 } from '@pancakeswap/uikit'
 import { useTranslation } from 'contexts/Localization'
-import { useProfile } from 'state/hooks'
+import { useProfile } from 'state/profile/hooks'
 import usePersistState from 'hooks/usePersistState'
+import { getBscScanLink } from 'utils'
 import Menu from './components/Menu'
 import CardHeader from './components/CardHeader'
 import Collectibles from './components/Collectibles'
@@ -83,7 +84,9 @@ const Section = styled.div`
 const PublicProfile = () => {
   const { account } = useWeb3React()
   const { profile } = useProfile()
-  const [usernameVisibilityToggled, setUsernameVisibility] = usePersistState(false, 'username_visibility_toggled')
+  const [usernameVisibilityToggled, setUsernameVisibility] = usePersistState(false, {
+    localStorageKey: 'username_visibility_toggled',
+  })
   const { t } = useTranslation()
 
   if (!account) {
@@ -112,7 +115,7 @@ const PublicProfile = () => {
                   <Icon ml="4px" onClick={toggleUsernameVisibility} cursor="pointer" />
                 </Flex>
                 <Flex alignItems="center">
-                  <AddressLink href={`https://bscscan.com/address/${account}`} color="text" external>
+                  <AddressLink href={getBscScanLink(account, 'address')} color="text" external>
                     {account}
                     <OpenNewIcon ml="4px" />
                   </AddressLink>

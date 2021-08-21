@@ -5,6 +5,7 @@ import useToast from 'hooks/useToast'
 import { useClaimRefundContract } from 'hooks/useContract'
 import { useTranslation } from 'contexts/Localization'
 import { getClaimRefundContract } from 'utils/contractHelpers'
+import { useCallWithGasPrice } from 'hooks/useCallWithGasPrice'
 
 interface ClaimGiftProps extends InjectedModalProps {
   onSuccess: () => void
@@ -22,8 +23,12 @@ export const useCanClaim = () => {
   useEffect(() => {
     const fetchClaimStatus = async () => {
       const claimRefundContract = getClaimRefundContract()
-      const walletCanClaim = await claimRefundContract.methods.canClaim(account).call()
-      setCanClaim(walletCanClaim)
+      try {
+        const walletCanClaim = await claimRefundContract.canClaim(account)
+        setCanClaim(walletCanClaim)
+      } catch (e) {
+        console.error(e)
+      }
     }
 
     if (account) {
@@ -36,28 +41,24 @@ export const useCanClaim = () => {
 
 const ClaimGift: React.FC<ClaimGiftProps> = ({ onSuccess, onDismiss }) => {
   const [isConfirming, setIsConfirming] = useState(false)
-  const { account } = useWeb3React()
   const { t } = useTranslation()
   const { canClaim } = useCanClaim()
   const claimRefundContract = useClaimRefundContract()
   const { toastSuccess, toastError } = useToast()
+  const { callWithGasPrice } = useCallWithGasPrice()
 
-  const handleClick = () => {
-    claimRefundContract.methods
-      .getCakeBack()
-      .send({ from: account })
-      .on('sending', () => {
-        setIsConfirming(true)
-      })
-      .on('receipt', () => {
-        toastSuccess('Success!')
-        onSuccess()
-        onDismiss()
-      })
-      .on('error', (error) => {
-        setIsConfirming(false)
-        toastError('Error', error?.message)
-      })
+  const handleClick = async () => {
+    const tx = await callWithGasPrice(claimRefundContract, 'getCakeBack')
+    setIsConfirming(true)
+    const receipt = await tx.wait()
+    if (receipt.status) {
+      toastSuccess(t('Success!'))
+      onSuccess()
+      onDismiss()
+    } else {
+      setIsConfirming(false)
+      toastError(t('Error'), t('Please try again. Confirm the transaction and make sure you are paying enough gas!'))
+    }
   }
 
   return (
@@ -69,9 +70,9 @@ const ClaimGift: React.FC<ClaimGiftProps> = ({ onSuccess, onDismiss }) => {
             "If you haven't already noticed, we made a mistake and the starter bunny you chose got mixed up and changed into another bunny. Oops!",
           )}
         </Text>
-        <Text as="p">{t("To make it up to you, we'll refund you the full 4 CAKE it cost to make your bunny.")}</Text>
+        <Text as="p">{t('To make it up to you, we’ll refund you the full 4 CAKE it cost to make your bunny.')}</Text>
         <Text as="p" mb="8px">
-          {t("We're also preparing an all-new collectible for you to claim (for free!) in the near future.")}
+          {t('We’re also preparing an all-new collectible for you to claim (for free!) in the near future.')}
         </Text>
         <Text as="p" mb="24px">
           {t(

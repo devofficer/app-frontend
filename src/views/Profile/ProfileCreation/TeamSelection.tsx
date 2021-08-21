@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react'
 import { Card, CardBody, CommunityIcon, Flex, Heading, Text } from '@pancakeswap/uikit'
 import shuffle from 'lodash/shuffle'
-import { useTeams } from 'state/hooks'
+import { useTeams } from 'state/teams/hooks'
 import { useTranslation } from 'contexts/Localization'
 import SelectionCard from '../components/SelectionCard'
 import NextStepButton from '../components/NextStepButton'
@@ -17,7 +17,7 @@ const Team: React.FC = () => {
   return (
     <>
       <Text fontSize="20px" color="textSubtle" bold>
-        {t(`Step ${3}`)}
+        {t('Step %num%', { num: 3 })}
       </Text>
       <Heading as="h3" scale="xl" mb="24px">
         {t('Join a Team')}

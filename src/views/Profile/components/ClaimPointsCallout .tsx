@@ -3,7 +3,7 @@ import { sumBy } from 'lodash'
 import { useAppDispatch } from 'state'
 import { useWeb3React } from '@web3-react/core'
 import { Card, CardBody, CardHeader, Flex, Heading, PrizeIcon } from '@pancakeswap/uikit'
-import { useProfile } from 'state/hooks'
+import { useProfile } from 'state/profile/hooks'
 import { Achievement } from 'state/types'
 import { addPoints } from 'state/profile'
 import { addAchievement } from 'state/achievements'
@@ -54,7 +54,7 @@ const ClaimPointsCallout = () => {
         <Flex flexDirection={['column', null, 'row']} justifyContent={['start', null, 'space-between']}>
           <Flex alignItems="center" mb={['16px', null, 0]}>
             <PrizeIcon width="32px" mr="8px" />
-            <Heading scale="lg">{t(`%num% Points to Collect`, { num: totalPointsToCollect })}</Heading>
+            <Heading scale="lg">{t('%num% Points to Collect', { num: totalPointsToCollect })}</Heading>
           </Flex>
         </Flex>
       </CardHeader>

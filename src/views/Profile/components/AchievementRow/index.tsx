@@ -1,11 +1,11 @@
 import React, { useState } from 'react'
-import { useWeb3React } from '@web3-react/core'
 import styled from 'styled-components'
 import { AutoRenewIcon, Button, Flex } from '@pancakeswap/uikit'
 import { Achievement } from 'state/types'
 import useToast from 'hooks/useToast'
 import { useTranslation } from 'contexts/Localization'
 import { usePointCenterIfoContract } from 'hooks/useContract'
+import { useCallWithGasPrice } from 'hooks/useCallWithGasPrice'
 import ActionColumn from '../ActionColumn'
 import PointsLabel from './PointsLabel'
 import AchievementTitle from '../AchievementTitle'
@@ -18,7 +18,7 @@ interface AchievementRowProps {
 }
 
 const StyledAchievementRow = styled(Flex)`
-  border-bottom: 1px solid ${({ theme }) => theme.colors.borderColor};
+  border-bottom: 1px solid ${({ theme }) => theme.colors.cardBorder};
   padding-bottom: 16px;
   padding-top: 16px;
 `
@@ -42,25 +42,21 @@ const AchievementRow: React.FC<AchievementRowProps> = ({ achievement, onCollectS
   const [isCollecting, setIsCollecting] = useState(false)
   const { t } = useTranslation()
   const pointCenterContract = usePointCenterIfoContract()
-  const { account } = useWeb3React()
   const { toastError, toastSuccess } = useToast()
+  const { callWithGasPrice } = useCallWithGasPrice()
 
-  const handleCollectPoints = () => {
-    pointCenterContract.methods
-      .getPoints(achievement.address)
-      .send({ from: account })
-      .on('sending', () => {
-        setIsCollecting(true)
-      })
-      .on('receipt', () => {
-        setIsCollecting(false)
-        onCollectSuccess(achievement)
-        toastSuccess('Points Collected!')
-      })
-      .on('error', (error) => {
-        toastError('Error', error?.message)
-        setIsCollecting(false)
-      })
+  const handleCollectPoints = async () => {
+    const tx = await callWithGasPrice(pointCenterContract, 'getPoints', [achievement.address])
+    setIsCollecting(true)
+    const receipt = await tx.wait()
+    if (receipt.status) {
+      setIsCollecting(false)
+      onCollectSuccess(achievement)
+      toastSuccess(t('Points Collected!'))
+    } else {
+      toastError(t('Error'), t('Please try again. Confirm the transaction and make sure you are paying enough gas!'))
+      setIsCollecting(false)
+    }
   }
 
   return (

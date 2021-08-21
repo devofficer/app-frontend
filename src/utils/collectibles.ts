@@ -21,7 +21,7 @@ export const getIdentifierKeyFromAddress = (nftAddress: string) => {
  */
 export const getTokenUrl = (tokenUri: string) => {
   if (tokenUri.startsWith('ipfs://')) {
-    return `${IPFS_GATEWAY}/ipfs/${tokenUri.slice(6)}`
+    return `${IPFS_GATEWAY}/${tokenUri.slice(6)}`
   }
 
   return tokenUri
@@ -34,7 +34,7 @@ export const getAddressByType = (type: NftType) => {
 export const getTokenUriData = async (nftAddress: string, tokenId: number) => {
   try {
     const contract = getErc721Contract(nftAddress)
-    const tokenUri = await contract.methods.tokenURI(tokenId).call()
+    const tokenUri = await contract.tokenURI(tokenId)
     const uriDataResponse = await fetch(getTokenUrl(tokenUri))
 
     if (!uriDataResponse.ok) {

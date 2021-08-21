@@ -1,14 +1,14 @@
-import React from 'react'
+import React, { useEffect, useCallback } from 'react'
 import orderBy from 'lodash/orderBy'
 import { useWeb3React } from '@web3-react/core'
 import nfts from 'config/constants/nfts'
 import { useAppDispatch } from 'state'
 import { fetchWalletNfts } from 'state/collectibles'
-import { useGetCollectibles } from 'state/hooks'
+import { useGetCollectibles } from 'state/collectibles/hooks'
 import NftCard from './NftCard'
 import NftGrid from './NftGrid'
-import BunnySpecialCard from './NftCard/BunnySpecialCard'
 import EasterNftCard from './NftCard/EasterNftCard'
+import LotteryNftCard from './NftCard/LotteryNftCard'
 
 /**
  * A map of bunnyIds to special campaigns (NFT distribution)
@@ -16,11 +16,12 @@ import EasterNftCard from './NftCard/EasterNftCard'
  *
  */
 const nftComponents = {
-  hiccup: BunnySpecialCard,
-  bullish: BunnySpecialCard,
   'easter-storm': EasterNftCard,
   'easter-flipper': EasterNftCard,
   'easter-caker': EasterNftCard,
+  lottie: LotteryNftCard,
+  lucky: LotteryNftCard,
+  baller: LotteryNftCard,
 }
 
 const NftList = () => {
@@ -28,14 +29,18 @@ const NftList = () => {
   const dispatch = useAppDispatch()
   const { account } = useWeb3React()
 
-  const handleRefresh = () => {
+  const handleRefresh = useCallback(() => {
     dispatch(fetchWalletNfts(account))
-  }
+  }, [dispatch, account])
+
+  useEffect(() => {
+    handleRefresh()
+  }, [account, handleRefresh])
 
   return (
     <NftGrid>
       {orderBy(nfts, 'sortOrder').map((nft) => {
-        const Card = nftComponents[nft.identifier] ?? NftCard
+        const Card = nftComponents[nft.identifier] || NftCard
 
         return (
           <div key={nft.name}>

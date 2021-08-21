@@ -1,28 +1,30 @@
 import React, { useEffect, useCallback, useState, useMemo, useRef } from 'react'
-import { Route, useRouteMatch, useLocation } from 'react-router-dom'
-import { useAppDispatch } from 'state'
+import { Route, useRouteMatch, useLocation, NavLink } from 'react-router-dom'
 import BigNumber from 'bignumber.js'
 import { useWeb3React } from '@web3-react/core'
-import { Image, Heading,Text } from '@pancakeswap/uikit'
+import { Image, Heading, RowType, Toggle, Text, Button, ArrowForwardIcon, Flex } from '@pancakeswap/uikit'
+import { ChainId } from '@pancakeswap/sdk'
 import styled from 'styled-components'
-import FlexLayout from 'components/layout/Flex'
-import Page from 'components/layout/Page'
-import { useFarms, usePriceCakeBusd, useGetApiPrices } from 'state/hooks'
-import useRefresh from 'hooks/useRefresh'
-import { fetchFarmUserDataAsync } from 'state/actions'
+import FlexLayout from 'components/Layout/Flex'
+import Page from 'components/Layout/Page'
+import { useFarms, usePollFarmsData, usePriceCakeBusd } from 'state/farms/hooks'
+import usePersistState from 'hooks/usePersistState'
 import { Farm } from 'state/types'
 import { useTranslation } from 'contexts/Localization'
 import { getFarmApr } from 'utils/apr'
 import { orderBy } from 'lodash'
-import { getAddress } from 'utils/addressHelpers'
 import isArchivedPid from 'utils/farmHelpers'
 import { latinise } from 'utils/latinise'
+import { useUserFarmStakedOnly } from 'state/user/hooks'
 import PageHeader from 'components/PageHeader'
-import { fetchFarmsPublicDataAsync, setLoadArchivedFarmsData } from 'state/farms'
 import Select, { OptionProps } from 'components/Select/Select'
+import Loading from 'components/Loading'
 import FarmCard, { FarmWithStakedValue } from './components/FarmCard/FarmCard'
 import FarmTabButtons from './components/FarmTabButtons'
-import SearchInput from './components/SearchInput'
+import SearchInput from 'components/SearchInput'
+import { RowProps } from './components/FarmTable/Row'
+import ToggleView from './components/ToggleView/ToggleView'
+import { DesktopColumnSchema, ViewMode } from './components/types'
 
 const ControlContainer = styled.div`
   display: flex;
@@ -88,44 +90,39 @@ const StyledImage = styled(Image)`
 `
 const NUMBER_OF_FARMS_VISIBLE = 12
 
+const getDisplayApr = (cakeRewardsApr?: number, lpRewardsApr?: number) => {
+  if (cakeRewardsApr && lpRewardsApr) {
+    return (cakeRewardsApr + lpRewardsApr).toLocaleString('en-US', { maximumFractionDigits: 2 })
+  }
+  if (cakeRewardsApr) {
+    return cakeRewardsApr.toLocaleString('en-US', { maximumFractionDigits: 2 })
+  }
+  return null
+}
+
 const Farms: React.FC = () => {
   const { path } = useRouteMatch()
   const { pathname } = useLocation()
   const { t } = useTranslation()
-  const { data: farmsLP } = useFarms()
+  const { data: farmsLP, userDataLoaded } = useFarms()
   const cakePrice = usePriceCakeBusd()
   const [query, setQuery] = useState('')
+  const [viewMode, setViewMode] = usePersistState(ViewMode.TABLE, { localStorageKey: 'pancake_farm_view' })
   const { account } = useWeb3React()
   const [sortOption, setSortOption] = useState('hot')
-  const prices = useGetApiPrices()
-
-  const dispatch = useAppDispatch()
-  const { fastRefresh } = useRefresh()
-  useEffect(() => {
-    if (account) {
-      dispatch(fetchFarmUserDataAsync(account))
-    }
-  }, [account, dispatch, fastRefresh])
+  const chosenFarmsLength = useRef(0)
 
   const isArchived = pathname.includes('archived')
   const isInactive = pathname.includes('history')
   const isActive = !isInactive && !isArchived
 
+  usePollFarmsData(isArchived)
+
   // Users with no wallet connected should see 0 as Earned amount
+  // Connected users should see loading indicator until first userData has loaded
+  const userDataReady = !account || (!!account && userDataLoaded)
 
-  useEffect(() => {
-    // Makes the main scheduled fetching to request archived farms data
-    dispatch(setLoadArchivedFarmsData(isArchived))
-
-    // Immediately request data for archived farms so users don't have to wait
-    // 60 seconds for public data and 10 seconds for user data
-    if (isArchived) {
-      dispatch(fetchFarmsPublicDataAsync())
-      if (account) {
-        dispatch(fetchFarmUserDataAsync(account))
-      }
-    }
-  }, [isArchived, dispatch, account])
+  const [stakedOnly, setStakedOnly] = useUserFarmStakedOnly(isActive)
 
   const activeFarms = farmsLP.filter((farm) => farm.pid !== 0 && farm.multiplier !== '0X' && !isArchivedPid(farm.pid))
   const inactiveFarms = farmsLP.filter((farm) => farm.pid !== 0 && farm.multiplier === '0X' && !isArchivedPid(farm.pid))
@@ -137,15 +134,15 @@ const Farms: React.FC = () => {
   const farmsList = useCallback(
     (farmsToDisplay: Farm[]): FarmWithStakedValue[] => {
       let farmsToDisplayWithAPR: FarmWithStakedValue[] = farmsToDisplay.map((farm) => {
-        if (!farm.lpTotalInQuoteToken || !prices) {
+        if (!farm.lpTotalInQuoteToken || !farm.quoteToken.busdPrice) {
           return farm
         }
+        const totalLiquidity = new BigNumber(farm.lpTotalInQuoteToken).times(farm.quoteToken.busdPrice)
+        const { cakeRewardsApr, lpRewardsApr } = isActive
+          ? getFarmApr(new BigNumber(farm.poolWeight), cakePrice, totalLiquidity, farm.lpAddresses[ChainId.MAINNET])
+          : { cakeRewardsApr: 0, lpRewardsApr: 0 }
 
-        const quoteTokenPriceUsd = prices[getAddress(farm.quoteToken.address).toLowerCase()]
-        const totalLiquidity = new BigNumber(farm.lpTotalInQuoteToken).times(quoteTokenPriceUsd)
-        const apr = isActive ? getFarmApr(farm.poolWeight, cakePrice, totalLiquidity) : 0
-
-        return { ...farm, apr, liquidity: totalLiquidity }
+        return { ...farm, apr: cakeRewardsApr, lpRewardsApr, liquidity: totalLiquidity }
       })
 
       if (query) {
@@ -156,7 +153,7 @@ const Farms: React.FC = () => {
       }
       return farmsToDisplayWithAPR
     },
-    [cakePrice, prices, query, isActive],
+    [cakePrice, query, isActive],
   )
 
   const handleChangeQuery = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -168,13 +165,13 @@ const Farms: React.FC = () => {
   const [numberOfFarmsVisible, setNumberOfFarmsVisible] = useState(NUMBER_OF_FARMS_VISIBLE)
   const [observerIsSet, setObserverIsSet] = useState(false)
 
-  const farmsStakedMemoized = useMemo(() => {
-    let farmsStaked = []
+  const chosenFarmsMemoized = useMemo(() => {
+    let chosenFarms = []
 
     const sortFarms = (farms: FarmWithStakedValue[]): FarmWithStakedValue[] => {
       switch (sortOption) {
         case 'apr':
-          return orderBy(farms, (farm: FarmWithStakedValue) => farm.apr, 'desc')
+          return orderBy(farms, (farm: FarmWithStakedValue) => farm.apr + farm.lpRewardsApr, 'desc')
         case 'multiplier':
           return orderBy(
             farms,
@@ -195,23 +192,42 @@ const Farms: React.FC = () => {
     }
 
     if (isActive) {
-      farmsStaked = farmsList(activeFarms)
+      chosenFarms = farmsList(activeFarms)
     }
     if (isInactive) {
-      farmsStaked = farmsList(inactiveFarms)
+      chosenFarms = farmsList(inactiveFarms)
     }
     if (isArchived) {
-      farmsStaked = farmsList(archivedFarms)
+      chosenFarms = farmsList(archivedFarms)
     }
 
-    return sortFarms(farmsStaked).slice(0, numberOfFarmsVisible)
-  }, [sortOption, activeFarms, farmsList, inactiveFarms, archivedFarms, isActive, isInactive, isArchived, numberOfFarmsVisible])
+    return sortFarms(chosenFarms).slice(0, numberOfFarmsVisible)
+  }, [
+    sortOption,
+    activeFarms,
+    farmsList,
+    inactiveFarms,
+    archivedFarms,
+    isActive,
+    isInactive,
+    isArchived,
+    stakedInactiveFarms,
+    stakedOnly,
+    numberOfFarmsVisible,
+  ])
+
+  chosenFarmsLength.current = chosenFarmsMemoized.length
 
   useEffect(() => {
     const showMoreFarms = (entries) => {
       const [entry] = entries
       if (entry.isIntersecting) {
-        setNumberOfFarmsVisible((farmsCurrentlyVisible) => farmsCurrentlyVisible + NUMBER_OF_FARMS_VISIBLE)
+        setNumberOfFarmsVisible((farmsCurrentlyVisible) => {
+          if (farmsCurrentlyVisible <= chosenFarmsLength.current) {
+            return farmsCurrentlyVisible + NUMBER_OF_FARMS_VISIBLE
+          }
+          return farmsCurrentlyVisible
+        })
       }
     }
 
@@ -223,29 +239,88 @@ const Farms: React.FC = () => {
       loadMoreObserver.observe(loadMoreRef.current)
       setObserverIsSet(true)
     }
-  }, [farmsStakedMemoized, observerIsSet])
+  }, [chosenFarmsMemoized, observerIsSet])
+
+  const rowData = chosenFarmsMemoized.map((farm) => {
+    const { token, quoteToken } = farm
+    const tokenAddress = token.address
+    const quoteTokenAddress = quoteToken.address
+    const lpLabel = farm.lpSymbol && farm.lpSymbol.split(' ')[0].toUpperCase().replace('PANCAKE', '')
+
+    const row: RowProps = {
+      apr: {
+        value: getDisplayApr(farm.apr, farm.lpRewardsApr),
+        pid: farm.pid,
+        multiplier: farm.multiplier,
+        lpLabel,
+        lpSymbol: farm.lpSymbol,
+        tokenAddress,
+        quoteTokenAddress,
+        cakePrice,
+        originalValue: farm.apr,
+      },
+      farm: {
+        label: lpLabel,
+        pid: farm.pid,
+        token: farm.token,
+        quoteToken: farm.quoteToken,
+      },
+      earned: {
+        earnings: getBalanceNumber(new BigNumber(farm.userData.earnings)),
+        pid: farm.pid,
+      },
+      liquidity: {
+        liquidity: farm.liquidity,
+      },
+      multiplier: {
+        multiplier: farm.multiplier,
+      },
+      details: farm,
+    }
+
+    return row
+  })
 
   const renderContent = (): JSX.Element => {
     return (
-      <div>
-        <FlexLayout>
-          <Route exact path={`${path}`}>
-            {farmsStakedMemoized.map((farm) => (
-              <FarmCard key={farm.pid} farm={farm} cakePrice={cakePrice} account={account} removed={false} />
-            ))}
-          </Route>
-          <Route exact path={`${path}/history`}>
-            {farmsStakedMemoized.map((farm) => (
-              <FarmCard key={farm.pid} farm={farm} cakePrice={cakePrice} account={account} removed />
-            ))}
-          </Route>
-          <Route exact path={`${path}/archived`}>
-            {farmsStakedMemoized.map((farm) => (
-              <FarmCard key={farm.pid} farm={farm} cakePrice={cakePrice} account={account} removed />
-            ))}
-          </Route>
-        </FlexLayout>
-      </div>
+      <FlexLayout>
+        <Route exact path={`${path}`}>
+          {chosenFarmsMemoized.map((farm) => (
+            <FarmCard
+              key={farm.pid}
+              farm={farm}
+              displayApr={getDisplayApr(farm.apr, farm.lpRewardsApr)}
+              cakePrice={cakePrice}
+              account={account}
+              removed={false}
+            />
+          ))}
+        </Route>
+        <Route exact path={`${path}/history`}>
+          {chosenFarmsMemoized.map((farm) => (
+            <FarmCard
+              key={farm.pid}
+              farm={farm}
+              displayApr={getDisplayApr(farm.apr, farm.lpRewardsApr)}
+              cakePrice={cakePrice}
+              account={account}
+              removed
+            />
+          ))}
+        </Route>
+        <Route exact path={`${path}/archived`}>
+          {chosenFarmsMemoized.map((farm) => (
+            <FarmCard
+              key={farm.pid}
+              farm={farm}
+              displayApr={getDisplayApr(farm.apr, farm.lpRewardsApr)}
+              cakePrice={cakePrice}
+              account={account}
+              removed
+            />
+          ))}
+        </Route>
+      </FlexLayout>
     )
   }
 
@@ -260,8 +335,16 @@ const Farms: React.FC = () => {
           {t('Farms')}
         </Heading>
         <Heading scale="lg" color="text">
-          {t('Stake Liquidity Pool (LP) tokens to earn.')}
+          {t('Stake LP tokens to earn.')}
         </Heading>
+        <NavLink exact activeClassName="active" to="/farms/auction" id="lottery-pot-banner">
+          <Button p="0" variant="text">
+            <Text color="primary" bold fontSize="16px" mr="4px">
+              {t('Community Auctions')}
+            </Text>
+            <ArrowForwardIcon color="primary" />
+          </Button>
+        </NavLink>
       </PageHeader>
       <Page>
         <ControlContainer>
@@ -270,27 +353,27 @@ const Farms: React.FC = () => {
           </ViewControls>
           <FilterContainer>
             <LabelWrapper>
-              <Text>SORT BY</Text>
+              <Text textTransform="uppercase">{t('Sort by')}</Text>
               <Select
                 options={[
                   {
-                    label: 'Hot',
+                    label: t('Hot'),
                     value: 'hot',
                   },
                   {
-                    label: 'APR',
+                    label: t('APR'),
                     value: 'apr',
                   },
                   {
-                    label: 'Multiplier',
+                    label: t('Multiplier'),
                     value: 'multiplier',
                   },
                   {
-                    label: 'Earned',
+                    label: t('Earned'),
                     value: 'earned',
                   },
                   {
-                    label: 'Liquidity',
+                    label: t('Liquidity'),
                     value: 'liquidity',
                   },
                 ]}
@@ -298,14 +381,19 @@ const Farms: React.FC = () => {
               />
             </LabelWrapper>
             <LabelWrapper style={{ marginLeft: 16 }}>
-              <Text>SEARCH</Text>
-              <SearchInput onChange={handleChangeQuery} />
+              <Text textTransform="uppercase">{t('Search')}</Text>
+              <SearchInput onChange={handleChangeQuery} placeholder="Search Farms" />
             </LabelWrapper>
           </FilterContainer>
         </ControlContainer>
         {renderContent()}
+        {account && !userDataLoaded && stakedOnly && (
+          <Flex justifyContent="center">
+            <Loading />
+          </Flex>
+        )}
         <div ref={loadMoreRef} />
-        <StyledImage src="/images/3dpan.png" alt="Pancake illustration" width={120} height={103} />
+        <StyledImage src="/images/decorations/3dpan.png" alt="Pancake illustration" width={120} height={103} />
       </Page>
     </>
   )

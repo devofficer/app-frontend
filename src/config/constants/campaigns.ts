@@ -11,6 +11,18 @@ import { Campaign } from './types'
 
 const campaigns: Campaign[] = [
   {
+    id: '511110000',
+    type: 'ifo',
+    title: 'Kalmar',
+    badge: 'ifo-kalm.svg',
+  },
+  {
+    id: '511100000',
+    type: 'ifo',
+    title: 'Hotcross',
+    badge: 'ifo-hotcross.svg',
+  },
+  {
     id: '511090000',
     type: 'ifo',
     title: 'Horizon Protocol',
@@ -153,6 +165,41 @@ const campaigns: Campaign[] = [
     type: 'teambattle',
     title: 'Easter Participant: Bronze',
     badge: 'easter-participant-bronze.svg',
+  },
+  {
+    id: '513010001',
+    type: 'participation',
+    title: 'Syrup Soaker',
+    description: 'Took a dip in the early days of the Auto CAKE Pool',
+    badge: 'syrup-soaker.svg',
+  },
+  {
+    id: '514010001',
+    type: 'participation',
+    title: 'Clairvoyant',
+    description: 'Played a round of Prediction before round 12,120',
+    badge: 'clairvoyant.svg',
+  },
+  {
+    id: '515010001',
+    type: 'participation',
+    title: 'Lottie',
+    description: 'Joined a round in the early days of Lottery V2',
+    badge: 'lottie.svg',
+  },
+  {
+    id: '515020001',
+    type: 'participation',
+    title: 'Lucky',
+    description: 'Won a round in the early days of Lottery V2',
+    badge: 'lucky.svg',
+  },
+  {
+    id: '515030001',
+    type: 'participation',
+    title: 'Baller',
+    description: 'Top 100 ticket buyer in the early days of Lottery V2',
+    badge: 'baller.svg',
   },
 ]
 

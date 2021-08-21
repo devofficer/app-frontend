@@ -1,4 +1,7 @@
 import BigNumber from 'bignumber.js'
+import { ethers } from 'ethers'
+import { formatUnits } from 'ethers/lib/utils'
+import { getLanguageCodeFromLS } from 'contexts/Localization/helpers'
 import { BIG_TEN } from './bigNumber'
 
 /**
@@ -19,8 +22,8 @@ export const getBalanceNumber = (balance: BigNumber, decimals = 18) => {
   return getBalanceAmount(balance, decimals).toNumber()
 }
 
-export const getFullDisplayBalance = (balance: BigNumber, decimals = 18, decimalsToAppear?: number) => {
-  return balance.dividedBy(BIG_TEN.pow(decimals)).toFixed(decimalsToAppear)
+export const getFullDisplayBalance = (balance: BigNumber, decimals = 18, displayDecimals?: number) => {
+  return getBalanceAmount(balance, decimals).toFixed(displayDecimals)
 }
 
 export const formatNumber = (number: number, minPrecision = 2, maxPrecision = 2) => {
@@ -30,3 +33,42 @@ export const formatNumber = (number: number, minPrecision = 2, maxPrecision = 2)
   }
   return number.toLocaleString(undefined, options)
 }
+
+/**
+ * Method to format the display of wei given an ethers.BigNumber object
+ * Note: does NOT round
+ */
+export const formatBigNumber = (number: ethers.BigNumber, displayDecimals = 18, decimals = 18) => {
+  const remainder = number.mod(ethers.BigNumber.from(10).pow(decimals - displayDecimals))
+  return formatUnits(number.sub(remainder), decimals)
+}
+
+/**
+ * Method to format the display of wei given an ethers.BigNumber object with toFixed
+ * Note: rounds
+ */
+export const formatBigNumberToFixed = (number: ethers.BigNumber, displayDecimals = 18, decimals = 18) => {
+  const formattedString = formatUnits(number, decimals)
+  return (+formattedString).toFixed(displayDecimals)
+}
+
+/**
+ * Formats a FixedNumber like BigNumber
+ * i.e. Formats 9763410526137450427.1196 into 9.763 (3 display decimals)
+ */
+export const formatFixedNumber = (number: ethers.FixedNumber, displayDecimals = 18, decimals = 18) => {
+  // Remove decimal
+  const [leftSide] = number.toString().split('.')
+  return formatBigNumber(ethers.BigNumber.from(leftSide), displayDecimals, decimals)
+}
+
+export const formatLocalisedCompactNumber = (number: number): string => {
+  const codeFromStorage = getLanguageCodeFromLS()
+  return new Intl.NumberFormat(codeFromStorage, {
+    notation: 'compact',
+    compactDisplay: 'long',
+    maximumSignificantDigits: 2,
+  }).format(number)
+}
+
+export default formatLocalisedCompactNumber

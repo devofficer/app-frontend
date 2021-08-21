@@ -1,14 +1,15 @@
 import React, { useContext, useState } from 'react'
 import styled from 'styled-components'
 import { AutoRenewIcon, Button, Card, CardBody, Heading, Skeleton, Text } from '@pancakeswap/uikit'
-import { Link as RouterLink } from 'react-router-dom'
 import { useWeb3React } from '@web3-react/core'
+import { Link as RouterLink } from 'react-router-dom'
 import { getAddressByType } from 'utils/collectibles'
 import { getPancakeProfileAddress } from 'utils/addressHelpers'
+import { getErc721Contract } from 'utils/contractHelpers'
 import { useTranslation } from 'contexts/Localization'
-import { useGetCollectibles } from 'state/hooks'
+import { useGetCollectibles } from 'state/collectibles/hooks'
 import useToast from 'hooks/useToast'
-import { useERC721 } from 'hooks/useContract'
+import { useCallWithGasPrice } from 'hooks/useCallWithGasPrice'
 import SelectionCard from '../components/SelectionCard'
 import NextStepButton from '../components/NextStepButton'
 import { ProfileCreationContext } from './contexts/ProfileCreationProvider'
@@ -22,30 +23,28 @@ const NftWrapper = styled.div`
 `
 
 const ProfilePicture: React.FC = () => {
+  const { library } = useWeb3React()
   const [isApproved, setIsApproved] = useState(false)
   const [isApproving, setIsApproving] = useState(false)
   const { selectedNft, actions } = useContext(ProfileCreationContext)
+
   const { t } = useTranslation()
   const { isLoading, nftsInWallet, tokenIds } = useGetCollectibles()
-  const contract = useERC721(selectedNft.nftAddress)
-  const { account } = useWeb3React()
   const { toastError } = useToast()
+  const { callWithGasPrice } = useCallWithGasPrice()
 
-  const handleApprove = () => {
-    contract.methods
-      .approve(getPancakeProfileAddress(), selectedNft.tokenId)
-      .send({ from: account })
-      .once('sending', () => {
-        setIsApproving(true)
-      })
-      .once('receipt', () => {
-        setIsApproving(false)
-        setIsApproved(true)
-      })
-      .once('error', (error) => {
-        toastError('Error', error?.message)
-        setIsApproving(false)
-      })
+  const handleApprove = async () => {
+    const contract = getErc721Contract(selectedNft.nftAddress, library.getSigner())
+    const tx = await callWithGasPrice(contract, 'approve', [getPancakeProfileAddress(), selectedNft.tokenId])
+    setIsApproving(true)
+    const receipt = await tx.wait()
+    if (receipt.status) {
+      setIsApproving(false)
+      setIsApproved(true)
+    } else {
+      toastError(t('Error'), t('Please try again. Confirm the transaction and make sure you are paying enough gas!'))
+      setIsApproving(false)
+    }
   }
 
   if (!isLoading && nftsInWallet.length === 0) {
@@ -69,7 +68,7 @@ const ProfilePicture: React.FC = () => {
   return (
     <>
       <Text fontSize="20px" color="textSubtle" bold>
-        {t(`Step ${2}`)}
+        {t('Step %num%', { num: 2 })}
       </Text>
       <Heading as="h3" scale="xl" mb="24px">
         {t('Set Profile Picture')}
@@ -124,8 +123,9 @@ const ProfilePicture: React.FC = () => {
             disabled={isApproved || isApproving || selectedNft.tokenId === null}
             onClick={handleApprove}
             endIcon={isApproving ? <AutoRenewIcon spin color="currentColor" /> : undefined}
+            id="approveStarterCollectible"
           >
-            {t('Approve')}
+            {t('Enable')}
           </Button>
         </CardBody>
       </Card>

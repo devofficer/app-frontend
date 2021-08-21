@@ -1,5 +1,4 @@
 import React, { useState } from 'react'
-import { useWeb3React } from '@web3-react/core'
 import styled from 'styled-components'
 import {
   Modal,
@@ -16,6 +15,7 @@ import {
 import { useTranslation } from 'contexts/Localization'
 import { useTradingCompetitionContract } from 'hooks/useContract'
 import useToast from 'hooks/useToast'
+import { useCallWithGasPrice } from 'hooks/useCallWithGasPrice'
 import { useCompetitionCakeRewards, getRewardGroupAchievements } from '../../helpers'
 import { CompetitionProps } from '../../types'
 import NftBunnies from '../../pngs/syrup-nft.png'
@@ -32,30 +32,26 @@ const ImageWrapper = styled(Flex)`
 const ClaimModal: React.FC<CompetitionProps> = ({ onDismiss, onClaimSuccess, userTradingInformation }) => {
   const [isConfirming, setIsConfirming] = useState(false)
   const tradingCompetitionContract = useTradingCompetitionContract()
-  const { account } = useWeb3React()
   const { toastSuccess, toastError } = useToast()
   const { t } = useTranslation()
 
   const { userRewardGroup, userCakeRewards, userPointReward, canClaimNFT } = userTradingInformation
   const { cakeReward } = useCompetitionCakeRewards(userCakeRewards)
   const { champion, teamPlayer } = getRewardGroupAchievements(userRewardGroup)
+  const { callWithGasPrice } = useCallWithGasPrice()
 
-  const handleClaimClick = () => {
-    tradingCompetitionContract.methods
-      .claimReward()
-      .send({ from: account })
-      .on('sending', () => {
-        setIsConfirming(true)
-      })
-      .on('receipt', async () => {
-        toastSuccess('You have claimed your rewards!')
-        onDismiss()
-        onClaimSuccess()
-      })
-      .on('error', (error) => {
-        toastError('Error', error?.message)
-        setIsConfirming(false)
-      })
+  const handleClaimClick = async () => {
+    const tx = await callWithGasPrice(tradingCompetitionContract, 'claimReward')
+    setIsConfirming(true)
+    const receipt = await tx.wait()
+    if (receipt.status) {
+      toastSuccess(t('You have claimed your rewards!'))
+      onDismiss()
+      onClaimSuccess()
+    } else {
+      toastError(t('Error'), t('Please try again. Confirm the transaction and make sure you are paying enough gas!'))
+      setIsConfirming(false)
+    }
   }
 
   return (

@@ -1,3 +1,4 @@
+import { ContextApi } from 'contexts/Localization/types'
 import { PageMeta } from './types'
 
 export const DEFAULT_META: PageMeta = {
@@ -7,38 +8,53 @@ export const DEFAULT_META: PageMeta = {
   image: 'https://pancakeswap.finance/images/hero.png',
 }
 
-export const customMeta: { [key: string]: PageMeta } = {
-  '/': {
-    title: 'Home | GPNSwap',
-  },
-  '/competition': {
-    title: 'Trading Battle | GPNSwap',
-  },
-  '/prediction': {
-    title: 'Prediction | GPNSwap',
-  },
-  '/farms': {
-    title: 'Farms | GPNSwap',
-  },
-  '/pools': {
-    title: 'Pools | GPNSwap',
-  },
-  '/lottery': {
-    title: 'Lottery | GPNSwap',
-  },
-  '/collectibles': {
-    title: 'Collectibles | GPNSwap',
-  },
-  '/ifo': {
-    title: 'Initial Farm Offering | GPNSwap',
-  },
-  '/teams': {
-    title: 'Leaderboard | GPNSwap',
-  },
-  '/profile/tasks': {
-    title: 'Task Center | GPNSwap',
-  },
-  '/profile': {
-    title: 'Your Profile | GPNSwap',
-  },
+export const getCustomMeta = (path: string, t: ContextApi['t']): PageMeta => {
+  switch (path) {
+    case '/':
+      return {
+        title: `${t('Home')} | GPNSwap`,
+      }
+    case '/competition':
+      return {
+        title: `${t('Trading Battle')} | GPNSwap`,
+      }
+    case '/prediction':
+      return {
+        title: `${t('Prediction')} | GPNSwap`,
+      }
+    case '/farms':
+      return {
+        title: `${t('Farms')} | GPNSwap`,
+      }
+    case '/pools':
+      return {
+        title: `${t('Pools')} | GPNSwap`,
+      }
+    case '/lottery':
+      return {
+        title: `${t('Lottery')} | GPNSwap`,
+      }
+    case '/collectibles':
+      return {
+        title: `${t('Collectibles')} | GPNSwap`,
+      }
+    case '/ifo':
+      return {
+        title: `${t('Initial Farm Offering')} | GPNSwap`,
+      }
+    case '/teams':
+      return {
+        title: `${t('Leaderboard')} | GPNSwap`,
+      }
+    case '/profile/tasks':
+      return {
+        title: `${t('Task Center')} | GPNSwap`,
+      }
+    case '/profile':
+      return {
+        title: `${t('Your Profile')} | GPNSwap`,
+      }
+    default:
+      return null
+  }
 }

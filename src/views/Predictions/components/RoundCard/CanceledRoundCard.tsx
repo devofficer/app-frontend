@@ -1,38 +1,35 @@
 import React from 'react'
-import { CardBody, Text, Flex, BlockIcon, LinkExternal } from '@pancakeswap/uikit'
+import { Card, CardBody, Text, Flex, BlockIcon, LinkExternal } from '@pancakeswap/uikit'
 import { useTranslation } from 'contexts/Localization'
-import { Round, BetPosition } from 'state/types'
-import { useGetTotalIntervalBlocks } from 'state/hooks'
+import { NodeRound, BetPosition } from 'state/types'
+import useTheme from 'hooks/useTheme'
 import ReclaimPositionButton from '../ReclaimPositionButton'
 import useIsRefundable from '../../hooks/useIsRefundable'
 import { RoundResultBox } from '../RoundResult'
 import MultiplierArrow from './MultiplierArrow'
-import Card from './Card'
-import CardHeader from './CardHeader'
+import CardHeader, { getBorderBackground } from './CardHeader'
 
 interface CanceledRoundCardProps {
-  round: Round
+  round: NodeRound
 }
 
 const CanceledRoundCard: React.FC<CanceledRoundCardProps> = ({ round }) => {
   const { t } = useTranslation()
-  const interval = useGetTotalIntervalBlocks()
+  const { theme } = useTheme()
   const { isRefundable, setIsRefundable } = useIsRefundable(round.epoch)
-  const { epoch, startBlock } = round
-  const estimatedEndBlock = startBlock + interval
+  const { epoch } = round
 
   const handleSuccess = async () => {
     setIsRefundable(false)
   }
 
   return (
-    <Card>
+    <Card borderBackground={getBorderBackground(theme, 'canceled')}>
       <CardHeader
         status="canceled"
         icon={<BlockIcon mr="4px" width="21px" />}
         title={t('Canceled')}
         epoch={round.epoch}
-        blockNumber={estimatedEndBlock}
       />
       <CardBody p="16px">
         <MultiplierArrow isDisabled />

@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import styled from 'styled-components'
-import Web3 from 'web3'
+import { ethers } from 'ethers'
 import { useWeb3React } from '@web3-react/core'
 import { Button, Input, Modal, Text } from '@pancakeswap/uikit'
 import { getAddressByType } from 'utils/collectibles'
@@ -8,6 +8,7 @@ import { Nft } from 'config/constants/types'
 import { useTranslation } from 'contexts/Localization'
 import useToast from 'hooks/useToast'
 import { useERC721 } from 'hooks/useContract'
+import { useCallWithGasPrice } from 'hooks/useCallWithGasPrice'
 import InfoRow from './InfoRow'
 
 interface TransferNftModalProps {
@@ -46,30 +47,27 @@ const TransferNftModal: React.FC<TransferNftModalProps> = ({ nft, tokenIds, onSu
   const { account } = useWeb3React()
   const contract = useERC721(getAddressByType(nft.type))
   const { toastSuccess } = useToast()
+  const { callWithGasPrice } = useCallWithGasPrice()
 
   const handleConfirm = async () => {
     try {
-      const isValidAddress = Web3.utils.isAddress(value)
+      const isValidAddress = ethers.utils.isAddress(value)
 
       if (!isValidAddress) {
         setError(t('Please enter a valid wallet address'))
       } else {
-        await contract.methods
-          .transferFrom(account, value, tokenIds[0])
-          .send({ from: account })
-          .on('sending', () => {
-            setIsLoading(true)
-          })
-          .on('receipt', () => {
-            onDismiss()
-            onSuccess()
-            toastSuccess('NFT successfully transferred!')
-          })
-          .on('error', () => {
-            console.error(error)
-            setError('Unable to transfer NFT')
-            setIsLoading(false)
-          })
+        const tx = await callWithGasPrice(contract, 'transferFrom', [account, value, tokenIds[0]])
+        setIsLoading(true)
+        // TODO: Refactor to try/catch pattern so error state is properly handled
+        const receipt = await tx.wait()
+        if (receipt.status) {
+          onDismiss()
+          onSuccess()
+          toastSuccess(t('NFT successfully transferred!'))
+        } else {
+          setError(t('Unable to transfer NFT'))
+          setIsLoading(false)
+        }
       }
     } catch (err) {
       console.error('Unable to transfer NFT:', err)
@@ -91,7 +89,7 @@ const TransferNftModal: React.FC<TransferNftModalProps> = ({ nft, tokenIds, onSu
         )}
         <InfoRow>
           <Text>{t('Transferring')}:</Text>
-          <Value>{`1x "${nft.name}" NFT`}</Value>
+          <Value>{t('1x %nftName% NFT', { nftName: nft.name })}</Value>
         </InfoRow>
         <Label htmlFor="transferAddress">{t('Receiving address')}:</Label>
         <Input

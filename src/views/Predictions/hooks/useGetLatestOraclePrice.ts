@@ -1,23 +1,21 @@
 import { useEffect, useState } from 'react'
-import BigNumber from 'bignumber.js'
-import { useChainlinkOracleContract } from 'hooks/useContract'
+import { ethers } from 'ethers'
 import useLastUpdated from 'hooks/useLastUpdated'
-import { getBalanceAmount } from 'utils/formatBalance'
-import { BIG_ZERO } from 'utils/bigNumber'
+import { getChainlinkOracleContract } from 'utils/contractHelpers'
 
 const useGetLatestOraclePrice = () => {
-  const [price, setPrice] = useState(BIG_ZERO)
+  const [price, setPrice] = useState(ethers.BigNumber.from(0))
   const { lastUpdated, setLastUpdated: refresh } = useLastUpdated()
-  const chainlinkOracleContract = useChainlinkOracleContract()
 
   useEffect(() => {
     const fetchPrice = async () => {
-      const response = await chainlinkOracleContract.methods.latestAnswer().call()
-      setPrice(getBalanceAmount(new BigNumber(response), 8))
+      const contract = getChainlinkOracleContract()
+      const response = await contract.latestAnswer()
+      setPrice(response)
     }
 
     fetchPrice()
-  }, [chainlinkOracleContract, lastUpdated, setPrice])
+  }, [lastUpdated, setPrice])
 
   return { price, lastUpdated, refresh }
 }

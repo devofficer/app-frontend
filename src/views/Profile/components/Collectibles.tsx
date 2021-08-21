@@ -2,7 +2,7 @@ import React from 'react'
 import { Heading, Text, Flex, ChevronRightIcon } from '@pancakeswap/uikit'
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'contexts/Localization'
-import { useGetCollectibles } from 'state/hooks'
+import { useGetCollectibles } from 'state/collectibles/hooks'
 import styled from 'styled-components'
 import CollectibleCard from './CollectibleCard'
 
@@ -40,7 +40,7 @@ const Collectibles = () => {
         {t('Pancake Collectibles are special ERC-721 NFTs that can be used on the PancakeSwap platform.')}
       </Text>
       <Text as="p">
-        {t("NFTs in this user's wallet that aren't approved Pancake Collectibles won't be shown here.")}
+        {t('NFTs in this user’s wallet that aren’t approved Pancake Collectibles won’t be shown here.')}
       </Text>
       {nftsInWallet.length > 0 && (
         <CollectibleList>

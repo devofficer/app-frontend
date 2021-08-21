@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
+import { useTranslation } from 'contexts/Localization'
 import { useWeb3React } from '@web3-react/core'
-import { useProfile } from 'state/hooks'
+import { useProfile } from 'state/profile/hooks'
 import { Flex, Box, Image } from '@pancakeswap/uikit'
 import styled from 'styled-components'
 import { useTradingCompetitionContract } from 'hooks/useContract'
@@ -14,26 +15,15 @@ import {
   OVER,
   REGISTRATION,
 } from 'config/constants/trading-competition/easterPhases'
+import PageSection from 'components/PageSection'
+import { DARKBG, MIDBLUEBG, MIDBLUEBG_DARK, LIGHTBLUEBG, LIGHTBLUEBG_DARK } from './pageSectionStyles'
 import { PrizesIcon, RanksIcon, RulesIcon } from './svgs'
-import {
-  DARKBG,
-  DARKFILL,
-  MIDBLUEBG,
-  MIDBLUEBG_DARK,
-  MIDBLUEFILL,
-  MIDBLUEFILL_DARK,
-  LIGHTBLUEBG,
-  LIGHTBLUEBG_DARK,
-  LIGHTBLUEFILL,
-  LIGHTBLUEFILL_DARK,
-} from './components/Section/sectionStyles'
 import Countdown from './components/Countdown'
 import YourScore from './components/YourScore'
 import StormBunny from './pngs/storm.png'
 import RibbonWithImage from './components/RibbonWithImage'
 import HowToJoin from './components/HowToJoin'
 import BattleBanner from './components/BattleBanner'
-import Section from './components/Section'
 import BattleCta from './components/BattleCta'
 import PrizesInfo from './components/PrizesInfo'
 import Rules from './components/Rules'
@@ -56,6 +46,13 @@ const BannerFlex = styled(Flex)`
   }
 `
 
+const BattleBannerSection = styled(PageSection)`
+  margin-top: -32px;
+  ${({ theme }) => theme.mediaQueries.lg} {
+    margin-top: -64px;
+  }
+`
+
 const BottomBunnyWrapper = styled(Box)`
   display: none;
 
@@ -70,8 +67,9 @@ const BottomBunnyWrapper = styled(Box)`
 const TradingCompetition = () => {
   const profileApiUrl = process.env.REACT_APP_API_PROFILE
   const { account } = useWeb3React()
+  const { t } = useTranslation()
   const { profile, isLoading } = useProfile()
-  const { isDark } = useTheme()
+  const { isDark, theme } = useTheme()
   const tradingCompetitionContract = useTradingCompetitionContract()
   const [currentPhase, setCurrentPhase] = useState(CompetitionPhases.LIVE)
   const [registrationSuccessful, setRegistrationSuccessful] = useState(false)
@@ -121,18 +119,18 @@ const TradingCompetition = () => {
 
   useEffect(() => {
     const fetchCompetitionInfoContract = async () => {
-      const competitionStatus = await tradingCompetitionContract.methods.currentStatus().call()
+      const competitionStatus = await tradingCompetitionContract.currentStatus()
       setCurrentPhase(SmartContractPhases[competitionStatus])
     }
 
     const fetchUserContract = async () => {
-      const user = await tradingCompetitionContract.methods.claimInformation(account).call()
+      const user = await tradingCompetitionContract.claimInformation(account)
       const userObject = {
         hasRegistered: user[0],
         hasUserClaimed: user[1],
-        userRewardGroup: user[2],
-        userCakeRewards: user[3],
-        userPointReward: user[4],
+        userRewardGroup: user[2].toString(),
+        userCakeRewards: user[3].toString(),
+        userPointReward: user[4].toString(),
         canClaimNFT: user[5],
       }
       setUserTradingInformation(userObject)
@@ -206,11 +204,20 @@ const TradingCompetition = () => {
 
   return (
     <CompetitionPage>
-      <Section
-        backgroundStyle={DARKBG}
-        svgFill={DARKFILL}
-        index={5}
-        intersectComponent={
+      <BattleBannerSection background={DARKBG} hasCurvedDivider={false} index={1}>
+        <BannerFlex mb={shouldHideCta ? '0px' : '48px'}>
+          <Countdown currentPhase={currentPhase} hasCompetitionEnded={hasCompetitionEnded} />
+          <BattleBanner />
+        </BannerFlex>
+      </BattleBannerSection>
+      <PageSection
+        containerProps={{ style: { marginTop: '-30px' } }}
+        background={isDark ? MIDBLUEBG_DARK : MIDBLUEBG}
+        concaveDivider
+        clipFill={{ light: '#CCD8F0', dark: '#434575' }}
+        dividerPosition="top"
+        index={2}
+        dividerComponent={
           shouldHideCta ? null : (
             <BattleCta
               userTradingInformation={userTradingInformation}
@@ -229,22 +236,7 @@ const TradingCompetition = () => {
           )
         }
       >
-        <BannerFlex mb={shouldHideCta ? '0px' : '48px'}>
-          <Countdown currentPhase={currentPhase} hasCompetitionEnded={hasCompetitionEnded} />
-          <BattleBanner />
-        </BannerFlex>
-      </Section>
-      <Section
-        backgroundStyle={isDark ? MIDBLUEBG_DARK : MIDBLUEBG}
-        svgFill={isDark ? MIDBLUEFILL_DARK : MIDBLUEFILL}
-        index={4}
-        intersectComponent={
-          <RibbonWithImage imageComponent={<RanksIcon width="175px" />} ribbonDirection="up">
-            Team Ranks
-          </RibbonWithImage>
-        }
-      >
-        <Box mt={shouldHideCta ? '0px' : ['94px', null, '36px']} mb={['24px', null, '0']}>
+        <Box mt={shouldHideCta ? '0px' : ['94px', null, '36px']} mb="64px">
           {/* If competition has not yet started, render HowToJoin component - if not, render YourScore */}
           {currentPhase.state === REGISTRATION ? (
             <HowToJoin />
@@ -264,16 +256,20 @@ const TradingCompetition = () => {
             />
           )}
         </Box>
-      </Section>
-      <Section
+      </PageSection>
+      <PageSection
+        containerProps={{ style: { marginTop: '-30px' } }}
         index={3}
-        intersectComponent={
-          <RibbonWithImage imageComponent={<PrizesIcon width="175px" />} ribbonDirection="up">
-            Prizes
+        concaveDivider
+        clipFill={{ light: theme.colors.background }}
+        dividerPosition="top"
+        dividerComponent={
+          <RibbonWithImage imageComponent={<RanksIcon width="175px" />} ribbonDirection="up">
+            {t('Team Ranks')}
           </RibbonWithImage>
         }
       >
-        <Box mt="54px">
+        <Box my="64px">
           <TeamRanks
             team1LeaderboardInformation={team1LeaderboardInformation}
             team2LeaderboardInformation={team2LeaderboardInformation}
@@ -281,29 +277,52 @@ const TradingCompetition = () => {
             globalLeaderboardInformation={globalLeaderboardInformation}
           />
         </Box>
-      </Section>
-      <Section
-        backgroundStyle={isDark ? LIGHTBLUEBG_DARK : LIGHTBLUEBG}
-        svgFill={isDark ? LIGHTBLUEFILL_DARK : LIGHTBLUEFILL}
-        index={2}
-        noIntersection
+      </PageSection>
+      <PageSection
+        containerProps={{ style: { marginTop: '-30px' } }}
+        dividerComponent={
+          <RibbonWithImage imageComponent={<PrizesIcon width="175px" />} ribbonDirection="up">
+            {t('Prizes')}
+          </RibbonWithImage>
+        }
+        concaveDivider
+        clipFill={{
+          light: 'linear-gradient(139.73deg, #e5fcfe 0%, #ecf6ff 100%)',
+          dark: 'linear-gradient(139.73deg, #303d5b 0%, #363457 100%)',
+        }}
+        dividerPosition="top"
+        background={isDark ? LIGHTBLUEBG_DARK : LIGHTBLUEBG}
+        index={4}
       >
-        <Box mb="78px">
+        <Box my="64px">
           <PrizesInfo />
         </Box>
-      </Section>
-      <Section
-        index={3}
-        intersectionPosition="top"
-        intersectComponent={
+      </PageSection>
+      <PageSection
+        containerProps={{ style: { marginTop: '-1px' } }}
+        index={5}
+        dividerPosition="top"
+        clipFill={{
+          light: 'linear-gradient(139.73deg, #ecf5ff 0%, #f2effe 100%)',
+          dark: 'linear-gradient(139.73deg, #383357 0%, #3d2b53 100%)',
+        }}
+        dividerComponent={
           <RibbonWithImage imageComponent={<RulesIcon width="175px" />} ribbonDirection="up">
-            Rules
+            {t('Rules')}
           </RibbonWithImage>
         }
       >
-        <Rules />
-      </Section>
-      <Section backgroundStyle={DARKBG} svgFill={DARKFILL} index={4} intersectionPosition="top">
+        <Box mt="64px">
+          <Rules />
+        </Box>
+      </PageSection>
+      <PageSection
+        index={6}
+        dividerPosition="top"
+        dividerFill={{ light: '#191326' }}
+        clipFill={{ light: theme.colors.background }}
+        background={DARKBG}
+      >
         <Flex alignItems="center">
           {shouldHideCta ? null : (
             <Flex height="fit-content">
@@ -327,7 +346,7 @@ const TradingCompetition = () => {
             <Image src={StormBunny} width={147} height={200} />
           </BottomBunnyWrapper>
         </Flex>
-      </Section>
+      </PageSection>
     </CompetitionPage>
   )
 }

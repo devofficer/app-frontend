@@ -2,11 +2,15 @@ import React, { useState } from 'react'
 import BigNumber from 'bignumber.js'
 import { Button, Flex, Heading } from '@pancakeswap/uikit'
 import { useTranslation } from 'contexts/Localization'
-import { useHarvest } from 'hooks/useHarvest'
-import { getBalanceNumber } from 'utils/formatBalance'
+import { useAppDispatch } from 'state'
+import { fetchFarmUserDataAsync } from 'state/farms'
+import useToast from 'hooks/useToast'
+import { getBalanceAmount } from 'utils/formatBalance'
+import { BIG_ZERO } from 'utils/bigNumber'
 import { useWeb3React } from '@web3-react/core'
-import { usePriceCakeBusd } from 'state/hooks'
-import CardBusdValue from '../../../Home/components/CardBusdValue'
+import { usePriceCakeBusd } from 'state/farms/hooks'
+import Balance from 'components/Balance'
+import useHarvestFarm from '../../hooks/useHarvestFarm'
 
 interface FarmCardActionsProps {
   earnings?: BigNumber
@@ -15,27 +19,44 @@ interface FarmCardActionsProps {
 
 const HarvestAction: React.FC<FarmCardActionsProps> = ({ earnings, pid }) => {
   const { account } = useWeb3React()
+  const { toastSuccess, toastError } = useToast()
   const { t } = useTranslation()
   const [pendingTx, setPendingTx] = useState(false)
-  const { onReward } = useHarvest(pid)
+  const { onReward } = useHarvestFarm(pid)
   const cakePrice = usePriceCakeBusd()
-
-  const rawEarningsBalance = account ? getBalanceNumber(earnings) : 0
-  const displayBalance = rawEarningsBalance.toLocaleString()
-  const earningsBusd = rawEarningsBalance ? new BigNumber(rawEarningsBalance).multipliedBy(cakePrice).toNumber() : 0
+  const dispatch = useAppDispatch()
+  const rawEarningsBalance = account ? getBalanceAmount(earnings) : BIG_ZERO
+  const displayBalance = rawEarningsBalance.toFixed(3, BigNumber.ROUND_DOWN)
+  const earningsBusd = rawEarningsBalance ? rawEarningsBalance.multipliedBy(cakePrice).toNumber() : 0
 
   return (
     <Flex mb="8px" justifyContent="space-between" alignItems="center">
-      <Heading color={rawEarningsBalance === 0 ? 'textDisabled' : 'text'}>
-        {displayBalance}
-        {earningsBusd > 0 && <CardBusdValue value={earningsBusd} />}
-      </Heading>
+      <Flex flexDirection="column" alignItems="flex-start">
+        <Heading color={rawEarningsBalance.eq(0) ? 'textDisabled' : 'text'}>{displayBalance}</Heading>
+        {earningsBusd > 0 && (
+          <Balance fontSize="12px" color="textSubtle" decimals={2} value={earningsBusd} unit=" USD" prefix="~" />
+        )}
+      </Flex>
       <Button
-        disabled={rawEarningsBalance === 0 || pendingTx}
+        disabled={rawEarningsBalance.eq(0) || pendingTx}
         onClick={async () => {
           setPendingTx(true)
-          await onReward()
-          setPendingTx(false)
+          try {
+            await onReward()
+            toastSuccess(
+              `${t('Harvested')}!`,
+              t('Your %symbol% earnings have been sent to your wallet!', { symbol: 'CAKE' }),
+            )
+          } catch (e) {
+            toastError(
+              t('Error'),
+              t('Please try again. Confirm the transaction and make sure you are paying enough gas!'),
+            )
+            console.error(e)
+          } finally {
+            setPendingTx(false)
+          }
+          dispatch(fetchFarmUserDataAsync({ account, pids: [pid] }))
         }}
       >
         {t('Harvest')}

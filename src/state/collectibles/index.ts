@@ -1,4 +1,3 @@
-/* eslint-disable no-param-reassign */
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
 import { CollectiblesState } from 'state/types'
 import { nftSources } from 'config/constants/nfts'
@@ -6,6 +5,7 @@ import { NftType } from 'config/constants/types'
 import { getAddress } from 'utils/addressHelpers'
 import { getErc721Contract } from 'utils/contractHelpers'
 import { getNftByTokenId } from 'utils/collectibles'
+import { ethers } from 'ethers'
 
 const initialState: CollectiblesState = {
   isInitialized: false,
@@ -27,17 +27,19 @@ export const fetchWalletNfts = createAsyncThunk<NftSourceItem[], string>(
 
       const getTokenIdAndData = async (index: number) => {
         try {
-          const tokenId = await contract.methods.tokenOfOwnerByIndex(account, index).call()
+          const tokenIdBn: ethers.BigNumber = await contract.tokenOfOwnerByIndex(account, index)
+          const tokenId = tokenIdBn.toNumber()
+
           const walletNft = await getNftByTokenId(address, tokenId)
-          return [Number(tokenId), walletNft.identifier]
+          return [tokenId, walletNft.identifier]
         } catch (error) {
           console.error('getTokenIdAndData', error)
           return null
         }
       }
 
-      const balanceOfResponse = await contract.methods.balanceOf(account).call()
-      const balanceOf = Number(balanceOfResponse)
+      const balanceOfResponse = await contract.balanceOf(account)
+      const balanceOf = balanceOfResponse.toNumber()
 
       if (balanceOf === 0) {
         return []
