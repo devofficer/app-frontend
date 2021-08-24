@@ -31,7 +31,7 @@ import GlobalCheckClaimStatus from './views/Collectibles/components/GlobalCheckC
 const Home = lazy(() => import('./views/Home'))
 const Farms = lazy(() => import('./views/Farms'))
 
-// const FarmAuction = lazy(() => import('./views/FarmAuction'))
+const FarmAuction = lazy(() => import('./views/FarmAuction'))
 // const Lottery = lazy(() => import('./views/Lottery'))
 const Ifos = lazy(() => import('./views/Ifos'))
 const NotFound = lazy(() => import('./views/NotFound'))
@@ -72,18 +72,18 @@ const App: React.FC = () => {
             <Route path="/" exact>
               <Home />
             </Route>
-            {/* <Route exact path="/farms/auction">
+            <Route exact path="/farms/auction">
               <FarmAuction />
-            </Route> */}
+            </Route>
             <Route path="/farms">
               <Farms />
-              {/* </Route>
-            <Route path="/pools">
+              </Route>
+            {/* <Route path="/pools">
               <Pools />
             </Route>
             <Route path="/lottery">
-              <Lottery /> */}
-            </Route>
+              <Lottery /> 
+            </Route> */}
             <Route path="/ifo">
               <Ifos />
             </Route>
@@ -133,7 +133,7 @@ const App: React.FC = () => {
             {/* <Route exact strict path="/remove/:currencyIdA/:currencyIdB" component={RemoveLiquidity} /> */}
 
             {/* Redirect */}
-            <Route path="/pool">
+            {/* <Route path="/pool">
               <Redirect to="/liquidity" />
             </Route>
             <Route path="/staking">  
@@ -144,7 +144,7 @@ const App: React.FC = () => {
             </Route>
             <Route path="/nft">
               <Redirect to="/collectibles" />
-            </Route>
+            </Route> */}
 
             {/* 404 */}
             <Route component={NotFound} />

@@ -1,9 +1,12 @@
 import React from 'react'
 import styled from 'styled-components'
+import { BaseLayout } from '@pancakeswap/uikit'
 import PageSection from 'components/PageSection'
 import { useWeb3React } from '@web3-react/core'
 import useTheme from 'hooks/useTheme'
 import Container from 'components/Layout/Container'
+import CakeStats from 'views/Home/components/CakeStats'
+import TotalValueLockedCard from './components/TotalValueLockedCard'
 import Hero from './components/Hero'
 import { swapSectionData, earnSectionData, cakeSectionData } from './components/SalesSection/data'
 import MetricsSection from './components/MetricsSection'
@@ -13,7 +16,10 @@ import FarmsPoolsRow from './components/FarmsPoolsRow'
 import Footer from './components/Footer'
 import CakeDataRow from './components/CakeDataRow'
 import { WedgeTopLeft, InnerWedgeWrapper, OuterWedgeWrapper, WedgeTopRight } from './components/WedgeSvgs'
-import UserBanner from './components/UserBanner'
+// import UserBanner from './components/UserBanner'
+import FarmStakingCard from './components/FarmStakingCard'
+import EnergyChart from './components/EnergyChart'
+
 
 const StyledHeroSection = styled(PageSection)`
   padding-top: 16px;
@@ -38,6 +44,28 @@ const UserBannerWrapper = styled(Container)`
     padding-right: 24px;
   }
 `
+const Cards = styled(BaseLayout)`
+  align-items: stretch;
+  justify-content: stretch;
+  margin-bottom: 32px;
+
+  & > div {
+    grid-column: span 6;
+    width: 100%;
+  }
+
+  ${({ theme }) => theme.mediaQueries.sm} {
+    & > div {
+      grid-column: span 8;
+    }
+  }
+
+  ${({ theme }) => theme.mediaQueries.lg} {
+    & > div {
+      grid-column: span 6;
+    }
+  }
+`
 
 const Home: React.FC = () => {
   const { theme } = useTheme()
@@ -47,23 +75,30 @@ const Home: React.FC = () => {
 
   return (
     <>
-      <StyledHeroSection
+      <PageSection
         innerProps={{ style: { margin: '0', width: '100%' } }}
         background={
           theme.isDark
-            ? 'radial-gradient(103.12% 50% at 50% 50%, #21193A 0%, #191326 100%)'
-            : 'linear-gradient(139.73deg, #E6FDFF 0%, #F3EFFF 100%)'
+            ? 'linear-gradient(180deg, #09070C 22%, #201335 100%)'
+            : 'linear-gradient(180deg, #FFFFFF 22%, #D7CAEC 100%)'
         }
         index={2}
         hasCurvedDivider={false}
       >
-        {account && (
-          <UserBannerWrapper>
-            <UserBanner />
-          </UserBannerWrapper>
-        )}
-        <Hero />
-      </StyledHeroSection>
+        <Cards>
+          <FarmStakingCard />
+          <EnergyChart />
+        </Cards>
+      </PageSection>
+      <PageSection
+        innerProps={{ style: HomeSectionContainerStyles }}
+        background={theme.colors.background}
+        index={2}
+        hasCurvedDivider={false}
+      >
+        <CakeStats />
+        <TotalValueLockedCard />
+      </PageSection>
       <PageSection
         innerProps={{ style: { margin: '0', width: '100%' } }}
         background={

@@ -37,6 +37,10 @@ const Title = (props) => {
   return <Heading as="h4" scale="lg" my="16px" {...props} />
 }
 
+const Parag = (props) => {
+  return <Text as="p" my="16px" {...props} />
+}
+
 const markdownComponents: Partial<NormalComponents & SpecialComponents> = {
   h1: Title,
   h2: Title,
@@ -44,9 +48,7 @@ const markdownComponents: Partial<NormalComponents & SpecialComponents> = {
   h4: Title,
   h5: Title,
   h6: Title,
-  p: (props) => {
-    return <Text as="p" my="16px" {...props} />
-  },
+  p: Parag,
   table: Table,
   ol: (props) => {
     return <ThemedComponent as="ol" {...props} />

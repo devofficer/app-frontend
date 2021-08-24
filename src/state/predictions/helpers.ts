@@ -219,8 +219,8 @@ export const getTotalWon = async (): Promise<number> => {
     `,
   )) as { market: TotalWonMarketResponse }
 
-  const totalBNB = market.totalBNB ? parseFloat(market.totalBNB) : 0
-  const totalBNBTreasury = market.totalBNBTreasury ? parseFloat(market.totalBNBTreasury) : 0
+  const totalBNB = market && market.totalBNB ? parseFloat(market.totalBNB) : 0
+  const totalBNBTreasury = market && market.totalBNBTreasury ? parseFloat(market.totalBNBTreasury) : 0
 
   return Math.max(totalBNB - totalBNBTreasury, 0)
 }

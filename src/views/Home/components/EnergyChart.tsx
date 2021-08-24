@@ -1,24 +1,16 @@
 import React, { useState, useMemo } from 'react'
 import styled from 'styled-components'
 import { Heading, Card, CardBody } from '@pancakeswap/uikit'
-import Line from 'views/Lottery/components/PastDrawsHistory/LineChartWrapper'
-import Loading from 'views/Lottery/components/Loading'
+import Line from 'components/Chart/LineChartWrapper'
+import Loading from 'components/Loading'
 import { useTranslation } from 'contexts/Localization'
 import energyData from 'config/constants/energy'
 
-const StyledLotteryCard = styled(Card)`
+const StyledChartCard = styled(Card)`
   background-image: url('/images/ticket-bg.svg');
   background-repeat: no-repeat;
   background-position: top right;
   min-height: 376px;
-`
-
-const InnerWrapper = styled.div`
-  width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
 `
 
 const LotteryCard = () => {
@@ -73,6 +65,7 @@ const LotteryCard = () => {
       },
     }
   }
+
   const options = useMemo(() => {
     return {
       tooltips: {
@@ -97,21 +90,19 @@ const LotteryCard = () => {
       },
     }
   }, [])
+
   return (
-    <StyledLotteryCard>
+    <StyledChartCard>
       <CardBody>
         <Heading scale="xl" mb="24px">
           {t('Energy generated from all Projects')}
         </Heading>
-        {!historyError && historyData.length > 1 ? (
         <Line data={chartData} options={options} type="line" />
-        ) : (
-          <InnerWrapper>
-            <Loading />
-          </InnerWrapper>
-        )}
+        {!historyError && historyData.length > 1 ? (
+        null
+        ): null}
       </CardBody>
-    </StyledLotteryCard>
+    </StyledChartCard>
   )
 }
 
