@@ -10,6 +10,9 @@ import CardValue from './CardValue'
 const StyledCakeStats = styled(Card)`
   margin-left: auto;
   margin-right: auto;
+  width: calc(50% - 8px); 
+  float: left; 
+  margin: 0 4px;
 `
 
 const Row = styled.div`
@@ -29,7 +32,7 @@ const CakeStats = () => {
   return (
     <StyledCakeStats>
       <CardBody>
-        <Heading scale="xl" mb="24px">
+        <Heading scale="lg" mb="28px">
           {t('CCM Stats')}
         </Heading>
         <Row>

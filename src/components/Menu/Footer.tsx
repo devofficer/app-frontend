@@ -38,22 +38,6 @@ const Footer = () => {
   const { t } = useTranslation()
   return (
     <Wrapper>
-      <Flex flexDirection={['column', 'column', 'row']} alignItems="center">
-        <ButtonMenu variant="subtle" scale="sm" activeIndex={0}>
-          <ButtonMenuItem>V2</ButtonMenuItem>
-          <ButtonMenuItem as="a" href="https://v1exchange.pancakeswap.finance/#/">
-            V1 (old)
-          </ButtonMenuItem>
-        </ButtonMenu>
-        <LinkExternal
-          href="https://www.binance.org/en/bridge?utm_source=PancakeSwap"
-          ml={[0, 0, '40px']}
-          mt={['20px', '20px', 0]}
-          mb={['8px', '8px', 0]}
-        >
-          {t('Convert ERC-20 to BEP-20')}
-        </LinkExternal>
-      </Flex>
       <Flex
         flexGrow={1}
         alignItems="center"

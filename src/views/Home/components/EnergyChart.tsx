@@ -98,9 +98,6 @@ const LotteryCard = () => {
           {t('Energy generated from all Projects')}
         </Heading>
         <Line data={chartData} options={options} type="line" />
-        {!historyError && historyData.length > 1 ? (
-        null
-        ): null}
       </CardBody>
     </StyledChartCard>
   )
