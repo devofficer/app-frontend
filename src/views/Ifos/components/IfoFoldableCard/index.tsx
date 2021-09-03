@@ -77,11 +77,9 @@ const CardsWrapper = styled.div<{ singleCard: boolean }>`
   display: grid;
   grid-gap: 32px;
   grid-template-columns: 1fr;
-  margin-bottom: 32px;
-  ${({ theme }) => theme.mediaQueries.md} {
-    grid-template-columns: ${({ singleCard }) => (singleCard ? '1fr' : '1fr 1fr')};
-    justify-items: ${({ singleCard }) => (singleCard ? 'center' : 'unset')};
-  }
+  margin: 0 auto 32px;
+  width: 400px;
+  max-width: 400px;
 `
 
 const StyledCardBody = styled(CardBody)`
@@ -142,43 +140,21 @@ const IfoFoldableCard: React.FC<IfoFoldableCardProps> = ({ ifo, publicIfoData, w
   }, [account, raisingTokenContract, contract, setEnableStatus])
 
   return (
-    <StyledCard ribbon={Ribbon}>
-      <Header ifoId={ifo.id}>
-        <ExpandableButton expanded={isVisible} onClick={() => setIsVisible((prev) => !prev)} />
-      </Header>
-      <FoldableContent isVisible={isVisible} isActive={publicIfoData.status !== 'idle' && isActive}>
-        {isActive && <Progress variant="flat" primaryStep={publicIfoData.progress} />}
-        <StyledCardBody>
-          {isActive && <Timer publicIfoData={publicIfoData} />}
-          <CardsWrapper singleCard={!publicIfoData.poolBasic || !walletIfoData.poolBasic}>
-            {publicIfoData.poolBasic && walletIfoData.poolBasic && (
-              <IfoPoolCard
-                poolId={PoolIds.poolBasic}
-                ifo={ifo}
-                publicIfoData={publicIfoData}
-                walletIfoData={walletIfoData}
-                onApprove={handleApprove}
-                enableStatus={enableStatus}
-              />
-            )}
+      <StyledCardBody>
+        <CardsWrapper singleCard={!publicIfoData.poolBasic || !walletIfoData.poolBasic}>
+          {publicIfoData.poolBasic && walletIfoData.poolBasic && (
             <IfoPoolCard
-              poolId={PoolIds.poolUnlimited}
+              poolId={PoolIds.poolBasic}
               ifo={ifo}
               publicIfoData={publicIfoData}
               walletIfoData={walletIfoData}
               onApprove={handleApprove}
               enableStatus={enableStatus}
             />
-          </CardsWrapper>
-          <Achievement ifo={ifo} publicIfoData={publicIfoData} />
-        </StyledCardBody>
-        <StyledCardFooter>
-          <Button variant="text" endIcon={<ChevronUpIcon color="primary" />} onClick={() => setIsVisible(false)}>
-            {t('Close')}
-          </Button>
-        </StyledCardFooter>
-      </FoldableContent>
-    </StyledCard>
+          )}
+        </CardsWrapper>
+        <Achievement ifo={ifo} publicIfoData={publicIfoData} />
+      </StyledCardBody>
   )
 }
 

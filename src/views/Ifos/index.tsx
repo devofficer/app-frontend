@@ -1,11 +1,11 @@
 import React from 'react'
 import { useTranslation } from 'contexts/Localization'
 import { Route, useRouteMatch, Link } from 'react-router-dom'
-import { ButtonMenu, ButtonMenuItem, Flex } from '@pancakeswap/uikit'
+import PageHeader from 'components/PageHeader'
+import { Heading } from '@pancakeswap/uikit'
 import Container from 'components/Layout/Container'
-import Hero from './components/Hero'
 import CurrentIfo from './CurrentIfo'
-import PastIfo from './PastIfo'
+// import PastIfo from './PastIfo'
 
 const Ifos = () => {
   const { t } = useTranslation()
@@ -13,23 +13,17 @@ const Ifos = () => {
 
   return (
     <>
-      <Hero />
+      <PageHeader>
+        <Heading as="h1" scale="xxl" color="secondary" mb="24px">
+          {t('IFO: Initial Farm Offerings')}
+        </Heading>
+        <Heading scale="lg" color="text">
+          {t('Buy new tokens with a brand new token sale model.')}
+        </Heading>
+      </PageHeader>
       <Container>
-        <Flex justifyContent="center" alignItems="center" mb="32px">
-          <ButtonMenu activeIndex={!isExact ? 1 : 0} scale="sm" variant="subtle">
-            <ButtonMenuItem as={Link} to={`${url}`}>
-              {t('Next IFO')}
-            </ButtonMenuItem>
-            <ButtonMenuItem as={Link} to={`${url}/history`}>
-              {t('Past IFOs')}
-            </ButtonMenuItem>
-          </ButtonMenu>
-        </Flex>
         <Route exact path={`${path}`}>
           <CurrentIfo />
-        </Route>
-        <Route path={`${path}/history`}>
-          <PastIfo />
         </Route>
       </Container>
     </>

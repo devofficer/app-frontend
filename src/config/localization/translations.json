@@ -1089,6 +1089,7 @@
   "Invalid pair.": "Invalid pair.",
   "You don’t have liquidity in this pool yet.": "You don’t have liquidity in this pool yet.",
   "%assetA%/%assetB% Burned": "%assetA%/%assetB% Burned",
+  "Expected Yield": "Expected Yield",
   "Price": "Price",
   "Prices": "Prices",
   "Remove %assetA%-%assetB% liquidity": "Remove %assetA%-%assetB% liquidity",

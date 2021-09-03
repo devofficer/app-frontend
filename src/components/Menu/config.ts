@@ -21,7 +21,7 @@ const config: (t: ContextApi['t']) => MenuEntry[] = (t) => [
       },
       // {
       //   label: t('LP Migration'),
-      //   href: 'https://v1exchange.pancakeswap.finance/#/migrate',
+      //   href: '/coming-soon',
       // },
     ],
   },
@@ -76,7 +76,7 @@ const config: (t: ContextApi['t']) => MenuEntry[] = (t) => [
   {
     label: t('Info'),
     icon: 'InfoIcon',
-    href: 'https://pancakeswap.info',
+    href: '/coming-soon',
   },
   {
     label: t('IFO'),
@@ -89,27 +89,27 @@ const config: (t: ContextApi['t']) => MenuEntry[] = (t) => [
     items: [
       {
         label: t('Contact'),
-        href: 'https://docs.pancakeswap.finance/contact-us',
+        href: 'https://www.grayblockpower.com/#Contact',
       },
       {
         label: t('Voting'),
-        href: '/voting',
+        href: '/coming-soon',
       },
       {
         label: t('Github'),
-        href: 'https://github.com/pancakeswap',
+        href: '/coming-soon',
       },
       {
         label: t('Docs'),
-        href: 'https://docs.pancakeswap.finance',
+        href: '/coming-soon',
       },
       {
         label: t('Blog'),
-        href: 'https://pancakeswap.medium.com',
+        href: 'https://medium.com/@grayblockpower',
       },
       {
         label: t('Merch'),
-        href: 'https://pancakeswap.creator-spring.com/',
+        href: '/coming-soon',
       },
     ],
   },

@@ -84,7 +84,7 @@ const LotteryCard = () => {
         ],
         xAxes: [
           {
-            ...axesStyles({ color: '#452A7A', lineHeight: 1 }),
+            ...axesStyles({ color: '#8f80ba', lineHeight: 1 }),
           },
         ],
       },

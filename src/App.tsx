@@ -35,6 +35,7 @@ const FarmAuction = lazy(() => import('./views/FarmAuction'))
 // const Lottery = lazy(() => import('./views/Lottery'))
 const Ifos = lazy(() => import('./views/Ifos'))
 const NotFound = lazy(() => import('./views/NotFound'))
+const ComingSoon = lazy(() => import('./views/ComingSoon'))
 // const Collectibles = lazy(() => import('./views/Collectibles'))
 // const Teams = lazy(() => import('./views/Teams'))
 // const Team = lazy(() => import('./views/Teams/Team'))
@@ -145,7 +146,10 @@ const App: React.FC = () => {
             <Route path="/nft">
               <Redirect to="/collectibles" />
             </Route> */}
-
+            
+            <Route path="/coming-soon">
+              <ComingSoon />
+            </Route>
             {/* 404 */}
             <Route component={NotFound} />
           </Switch>

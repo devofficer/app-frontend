@@ -349,6 +349,13 @@ export default function Swap({ history }: RouteComponentProps) {
               id="swap-currency-output"
             />
 
+            <AutoColumn gap="8px" style={{ padding: '0 16px' }}>
+              <AutoRow justify="space-between">
+              <Label>{t('Expected Yield')}</Label>
+              <Text style={{ justifyContent: 'center', alignItems: 'center', display: 'flex' }}>-</Text>
+              </AutoRow>
+            </AutoColumn>  
+
             {isExpertMode && recipient !== null && !showWrap ? (
               <>
                 <AutoRow justify="space-between" style={{ padding: '0 1rem' }}>
