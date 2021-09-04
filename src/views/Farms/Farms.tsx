@@ -14,7 +14,7 @@ import { getFarmApr } from 'utils/apr'
 import { orderBy } from 'lodash'
 import isArchivedPid from 'utils/farmHelpers'
 import { latinise } from 'utils/latinise'
-import PageHeader from 'components/PageHeader'
+import PageHeaderBgPic from 'components/PageHeader/PageHeaderBgPic'
 import SearchInput from 'components/SearchInput'
 import Select, { OptionProps } from 'components/Select/Select'
 import Loading from 'components/Loading'
@@ -276,22 +276,22 @@ const Farms: React.FC = () => {
 
   return (
     <>
-      <PageHeader>
-        <Heading as="h1" scale="xxl" color="secondary" mb="24px">
+      <PageHeaderBgPic>
+        <Heading as="h1" scale="xl" color="#000" mb="24px">
           {t('Farms')}
         </Heading>
-        <Heading scale="lg" color="text">
+        <Heading scale="md" color="#170E25">
           {t('Stake LP tokens to earn.')}
         </Heading>
         <NavLink exact activeClassName="active" to="/farms/auction" id="lottery-pot-banner">
           <Button p="0" variant="text">
-            <Text color="primary" bold fontSize="16px" mr="4px">
+            <Text color="#170E25" bold fontSize="16px" mr="4px">
               {t('Community Auctions')}
             </Text>
-            <ArrowForwardIcon color="primary" />
+            <ArrowForwardIcon color="#170E25" />
           </Button>
         </NavLink>
-      </PageHeader>
+      </PageHeaderBgPic>
       <Page>
         <ControlContainer>
           <ViewControls>

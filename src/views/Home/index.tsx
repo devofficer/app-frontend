@@ -1,10 +1,11 @@
 import React from 'react'
 import styled from 'styled-components'
-import { BaseLayout } from '@pancakeswap/uikit'
+import { Heading, BaseLayout } from '@pancakeswap/uikit'
+import { useTranslation } from 'contexts/Localization'
+import PageHeaderBgPic from 'components/PageHeader/PageHeaderBgPic'
 import PageSection from 'components/PageSection'
 import { useWeb3React } from '@web3-react/core'
 import useTheme from 'hooks/useTheme'
-import Container from 'components/Layout/Container'
 import CakeStats from 'views/Home/components/CakeStats'
 import TotalValueLockedCard from './components/TotalValueLockedCard'
 // import UserBanner from './components/UserBanner'
@@ -35,20 +36,23 @@ const Cards = styled(BaseLayout)`
 `
 
 const Home: React.FC = () => {
+  const { t } = useTranslation()
   const { theme } = useTheme()
   const { account } = useWeb3React()
 
-  const CakeStatsContainerStyles = { margin: '0', width: '100%' }
-
   return (
     <>
+      <PageHeaderBgPic backgroundImage='/images/ifos/banner-1.png' >
+        <Heading as="h1" scale="xl" color="#000" mb="24px">
+          {t('PancakeSwap')}
+        </Heading>
+        <Heading scale="md" color="#170E25">
+          {t('The #1 AMM and yield farm on Binance Smart Chain.')}
+        </Heading>
+      </PageHeaderBgPic>
       <PageSection
-        innerProps={{ style: { margin: '0', width: '100%' } }}
-        background={
-          theme.isDark
-            ? 'linear-gradient(180deg, #09070C 22%, #201335 100%)'
-            : 'linear-gradient(180deg, #FFFFFF 22%, #D7CAEC 100%)'
-        }
+        innerProps={{ style: { margin: '0', width: '100%', 'paddingTop':'0px', 'paddingBottom':'0px'} }}
+        background={ theme.isDark ? '#170E25' : '#D9CDED' }
         index={2}
         hasCurvedDivider={false}
       >
@@ -58,7 +62,7 @@ const Home: React.FC = () => {
         </Cards>
       </PageSection>
       <PageSection
-        innerProps={{ style: CakeStatsContainerStyles }}
+        innerProps={{ style: { margin: '0', width: '100%', 'paddingTop':'0px', 'paddingBottom':'0px' } }}
         background={theme.colors.background}
         index={2}
         hasCurvedDivider={false}
