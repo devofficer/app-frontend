@@ -108,10 +108,10 @@ const config: (t: ContextApi['t']) => MenuEntry[] = (t) => [
         label: t('Blog'),
         href: 'https://medium.com/@grayblockpower',
       },
-      {
-        label: t('Merch'),
-        href: '/coming-soon',
-      },
+      // {
+      //   label: t('Merch'),
+      //   href: '/coming-soon',
+      // },
     ],
   },
 ]
