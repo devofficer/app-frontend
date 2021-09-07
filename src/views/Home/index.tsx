@@ -42,7 +42,7 @@ const Home: React.FC = () => {
 
   return (
     <>
-      <PageHeaderBgPic backgroundImage='/images/ifos/banner-1.png' >
+      <PageHeaderBgPic backgroundImage='/images/home/banner-1.png' >
         <Heading as="h1" scale="xl" color="#000" mb="24px">
           {t('PancakeSwap')}
         </Heading>
@@ -61,7 +61,7 @@ const Home: React.FC = () => {
           <EnergyChart />
         </Cards>
       </PageSection>
-      <PageSection
+      {/* <PageSection
         innerProps={{ style: { margin: '0', width: '100%', 'paddingTop':'0px', 'paddingBottom':'0px' } }}
         background={theme.colors.background}
         index={2}
@@ -69,7 +69,7 @@ const Home: React.FC = () => {
       >
         <CakeStats />
         <TotalValueLockedCard />
-      </PageSection>
+      </PageSection> */}
     </>
   )
 }

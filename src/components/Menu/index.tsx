@@ -1,5 +1,6 @@
 import React from 'react'
-import { Menu as UikitMenu } from '@pancakeswap/uikit'
+// @ts-ignore
+import { Menu as UikitMenu } from '@pancakeswap-libs/uikit'
 import { languageList } from 'config/localization/languages'
 import { useTranslation } from 'contexts/Localization'
 import useTheme from 'hooks/useTheme'
@@ -18,6 +19,10 @@ const Menu = (props) => {
   return (
     <UikitMenu
       userMenu={<UserMenu />}
+      lightLogoUrl="/images/logo-light-1.png"
+      darkLogoUrl="/images/logo-light-1.png"
+      mobileLightLogoUrl="/images/logo-light-1.png"
+      mobileDarkLogoUrl="/images/logo-light-1.png"
       globalMenu={<GlobalSettings />}
       isDark={isDark}
       toggleTheme={toggleTheme}

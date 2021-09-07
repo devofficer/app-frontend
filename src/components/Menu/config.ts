@@ -8,22 +8,23 @@ const config: (t: ContextApi['t']) => MenuEntry[] = (t) => [
     href: '/',
   },
   {
-    label: t('Trade'),
+    label: t('Exchange'),
     icon: 'TradeIcon',
-    items: [
-      {
-        label: t('Exchange'),
-        href: '/swap',
-      },
-      {
-        label: t('Liquidity'),
-        href: '/pool',
-      },
+    href: '/swap',
+    // items: [
+    //   {
+    //     label: t('Exchange'),
+    //     href: '/swap',
+    //   },
+      // {
+      //   label: t('Liquidity'),
+      //   href: '/pool',
+      // },
       // {
       //   label: t('LP Migration'),
       //   href: '/coming-soon',
       // },
-    ],
+    // ],
   },
   {
     label: t('Farms'),
@@ -73,11 +74,11 @@ const config: (t: ContextApi['t']) => MenuEntry[] = (t) => [
   //     },
   //   ],
   // },
-  {
-    label: t('Info'),
-    icon: 'InfoIcon',
-    href: '/coming-soon',
-  },
+  // {
+  //   label: t('Info'),
+  //   icon: 'InfoIcon',
+  //   href: '/coming-soon',
+  // },
   {
     label: t('IFO'),
     icon: 'IfoIcon',
@@ -100,7 +101,7 @@ const config: (t: ContextApi['t']) => MenuEntry[] = (t) => [
         href: '/coming-soon',
       },
       {
-        label: t('Docs'),
+        label: t('Gitbook'),
         href: '/coming-soon',
       },
       {
