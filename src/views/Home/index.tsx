@@ -30,6 +30,12 @@ const Cards = styled(BaseLayout)`
     }
   }
 
+  ${({ theme }) => theme.mediaQueries.md} {
+    & > div {
+      grid-column: span 8;
+    }
+  }
+
   ${({ theme }) => theme.mediaQueries.lg} {
     & > div {
       grid-column: span 6;

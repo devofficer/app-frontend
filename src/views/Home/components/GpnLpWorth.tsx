@@ -11,6 +11,7 @@ const StyledGpnStats = styled(Card)`
   margin-left: auto;
   margin-right: auto;
   width: calc(50% - 8px); 
+  height: max-content;
   float: left; 
   margin: 0 4px;
 `
