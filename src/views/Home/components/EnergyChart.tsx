@@ -2,7 +2,6 @@ import React, { useState, useMemo } from 'react'
 import styled from 'styled-components'
 import { Heading, Card, CardBody } from '@pancakeswap/uikit'
 import Line from 'components/Chart/LineChartWrapper'
-import Loading from 'components/Loading'
 import { useTranslation } from 'contexts/Localization'
 import energyData from 'config/constants/energy'
 
@@ -11,6 +10,24 @@ const StyledChartCard = styled(Card)`
   background-repeat: no-repeat;
   background-position: top right;
   min-height: 376px;
+`
+const StyledHeader = styled.div`
+  position: absolute;
+  z-index: 400;
+  margin: auto 0;
+  display: block;
+  height: 100%;
+  width: 100%;
+  background: rgba(0,0,0,0.8);
+  text-align: center;
+  font-size: 24px;
+  font-weight: bolder;
+`
+
+const StyledSpan = styled.div`
+  position: relative;
+  top: 50%;
+  display: block;
 `
 
 const LotteryCard = () => {
@@ -93,6 +110,9 @@ const LotteryCard = () => {
 
   return (
     <StyledChartCard>
+        <StyledHeader>
+          <StyledSpan>coming soon</StyledSpan>
+        </StyledHeader>
       <CardBody>
         <Heading scale="xl" mb="24px">
           {t('Energy generated from all Projects')}

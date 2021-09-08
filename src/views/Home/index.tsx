@@ -6,8 +6,10 @@ import PageHeaderBgPic from 'components/PageHeader/PageHeaderBgPic'
 import PageSection from 'components/PageSection'
 import { useWeb3React } from '@web3-react/core'
 import useTheme from 'hooks/useTheme'
-import CakeStats from 'views/Home/components/CakeStats'
-import TotalValueLockedCard from './components/TotalValueLockedCard'
+import GpnStats from 'views/Home/components/GpnStats'
+import GpnLpWorth from 'views/Home/components/GpnLpWorth'
+// import CakeStats from 'views/Home/components/CakeStats'
+// import TotalValueLockedCard from './components/TotalValueLockedCard'
 // import UserBanner from './components/UserBanner'
 import FarmStakingCard from './components/FarmStakingCard'
 import EnergyChart from './components/EnergyChart'
@@ -60,7 +62,13 @@ const Home: React.FC = () => {
           <FarmStakingCard />
           <EnergyChart />
         </Cards>
+
+        <Cards>
+          <GpnStats />
+          <GpnLpWorth />
+        </Cards>
       </PageSection>
+      
       {/* <PageSection
         innerProps={{ style: { margin: '0', width: '100%', 'paddingTop':'0px', 'paddingBottom':'0px' } }}
         background={theme.colors.background}
