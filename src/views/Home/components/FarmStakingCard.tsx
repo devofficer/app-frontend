@@ -1,7 +1,6 @@
-import React, { useState, useCallback, useMemo } from 'react'
+import React, { useState, useCallback } from 'react'
 import styled from 'styled-components'
 import { Heading, Card, CardBody, Button } from '@pancakeswap/uikit'
-import { ChainId } from '@pancakeswap/sdk'
 import { useWeb3React } from '@web3-react/core'
 import { useTranslation } from 'contexts/Localization'
 import { useAllHarvest } from 'hooks/useHarvest'
@@ -14,6 +13,7 @@ import BigNumber from 'bignumber.js'
 import isArchivedPid from 'utils/farmHelpers'
 import { useFarms, usePriceCakeBusd } from 'state/farms/hooks'
 import { getFarmApr } from 'utils/apr'
+import CardValue from './CardValue'
 
 const StyledFarmStakingCard = styled(Card)`
   background-image: url('/images/cake-bg.svg');
@@ -21,6 +21,19 @@ const StyledFarmStakingCard = styled(Card)`
   background-position: top right;
   min-height: 376px;
 `
+const Block = styled.div`
+  margin-bottom: 16px;
+`
+
+const CardImage = styled.img`
+  margin-bottom: 16px;
+`
+
+const Label = styled.div`
+  color: ${({ theme }) => theme.colors.textSubtle};
+  font-size: 14px;
+`
+
 
 const Actions = styled.div`
   margin-top: 24px;
@@ -57,69 +70,24 @@ const FarmedStakingCard = () => {
       setPendingTx(false)
     }
   }, [onReward])
-
-  /* Add new code */
-  const cakePrice = usePriceCakeBusd()
-  const { data: farmsLP } = useFarms()
-  const activeFarms = farmsLP.filter((farm) => farm.pid !== 0 && farm.multiplier !== '0X' && !isArchivedPid(farm.pid))
-  const farmsList = useCallback(
-    (farmsToDisplay: Farm[]): FarmWithStakedValue[] => {
-      const farmsToDisplayWithAPR: FarmWithStakedValue[] = farmsToDisplay.map((farm) => {
-        if (!farm.lpTotalInQuoteToken || !farm.quoteToken.busdPrice) {
-          return farm
-        }
-        const totalLiquidity = new BigNumber(farm.lpTotalInQuoteToken).times(farm.quoteToken.busdPrice)
-        const { cakeRewardsApr, lpRewardsApr } = getFarmApr(new BigNumber(farm.poolWeight), cakePrice, totalLiquidity, farm.lpAddresses[ChainId.MAINNET])
-        return { ...farm, apr: cakeRewardsApr, lpRewardsApr, liquidity: totalLiquidity }
-      })
-
-      return farmsToDisplayWithAPR
-    },
-    [cakePrice],
-  )
-
-  const getDisplayApr = (cakeRewardsApr?: number, lpRewardsApr?: number) => {
-    if (cakeRewardsApr && lpRewardsApr) {
-      return (cakeRewardsApr + lpRewardsApr).toLocaleString('en-US', { maximumFractionDigits: 2 })
-    }
-    if (cakeRewardsApr) {
-      return cakeRewardsApr.toLocaleString('en-US', { maximumFractionDigits: 2 })
-    }
-    return null
-  }
-
-  const farmsStakedMemoized = useMemo(() => {
-    return farmsList(activeFarms).slice(0, 2)
-  }, [farmsList, activeFarms])
-
-  const renderContent = (): JSX.Element => {
-    return (
-      <div>
-        <FlexLayout>
-          <FarmList>
-            {farmsStakedMemoized.map((farm) => (
-              <FarmCard
-              key={farm.pid}
-              farm={farm}
-              displayApr={getDisplayApr(farm.apr, farm.lpRewardsApr)}
-              cakePrice={cakePrice}
-              account={account}
-              removed={false}
-            />
-            ))}
-          </FarmList>
-        </FlexLayout>
-      </div>
-    )
-  }
-  /* ===================== */
+  
   return (
     <StyledFarmStakingCard>
       <CardBody>
         <Heading scale="xl" mb="24px">
-          {t('Top Projects')}
-        </Heading>
-        {renderContent()}
+          {t('Farms & Staking')}
+         </Heading>
+        <CardImage src="/images/cake.svg" alt="cake logo" width={64} height={64} />
+        <Block>
+          <Label>{t('CAKE to Harvest')}:</Label>
+          <CardValue fontSize="14px" decimals={0} value={256351414} />
+
+        </Block>
+        <Block>
+          <Label>{t('CAKE in Wallet')}:</Label>
+          <CardValue fontSize="14px" decimals={0} value={256351414} />
+          
+        </Block>
         <Actions>
           {account ? (
             <Button
