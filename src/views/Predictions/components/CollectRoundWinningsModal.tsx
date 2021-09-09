@@ -91,7 +91,7 @@ const CollectRoundWinningsModal: React.FC<CollectRoundWinningsModalProps> = ({
           )}
         </Box>,
       )
-    } catch (error) {
+    } catch (error:  any) {
       console.error('Unable to claim winnings', error)
       toastError(
         t('Error'),

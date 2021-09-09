@@ -81,7 +81,7 @@ export const getGraphLotteries = async (
       { skip, first, where },
     )
     return response.lotteries
-  } catch (error) {
+  } catch (error: any) {
     console.error(error)
     return []
   }

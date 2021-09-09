@@ -18,7 +18,7 @@ interface ScheduleProps {
   showForClosedAuction?: boolean
 }
 
-export const AuctionSchedule: React.FC<ScheduleProps> = ({ auction }) => {
+export const AuctionSchedule: React.FC<ScheduleProps> = ({ auction, showForClosedAuction }) => {
   const { startBlock, endBlock, auctionDuration, startDate, endDate, status } = auction
   const { t } = useTranslation()
 

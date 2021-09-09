@@ -79,7 +79,7 @@ export const fetchLottery = async (lotteryId: string): Promise<LotteryResponse> 
   try {
     const lotteryData = await lotteryContract.viewLottery(lotteryId)
     return processViewLotterySuccessResponse(lotteryData, lotteryId)
-  } catch (error) {
+  } catch (error: any) {
     return processViewLotteryErrorResponse(lotteryId)
   }
 }
@@ -96,7 +96,7 @@ export const fetchMultipleLotteries = async (lotteryIds: string[]): Promise<Lott
       processViewLotterySuccessResponse(res[0], lotteryIds[index]),
     )
     return processedResponses
-  } catch (error) {
+  } catch (error: any) {
     console.error(error)
     return calls.map((call, index) => processViewLotteryErrorResponse(lotteryIds[index]))
   }
@@ -117,7 +117,7 @@ export const fetchCurrentLotteryIdAndMaxBuy = async () => {
       currentLotteryId: currentLotteryId ? currentLotteryId.toString() : null,
       maxNumberTicketsPerBuyOrClaim: maxNumberTicketsPerBuyOrClaim ? maxNumberTicketsPerBuyOrClaim.toString() : null,
     }
-  } catch (error) {
+  } catch (error: any) {
     return {
       currentLotteryId: null,
       maxNumberTicketsPerBuyOrClaim: null,

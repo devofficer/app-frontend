@@ -35,7 +35,7 @@ export const getLottieClaim = async (
           mintData: { bunnyId: variationId, lotteryId, cursor: '0' },
         }
       }
-    } catch (error) {
+    } catch (error:  any) {
       console.error(`Failed to check canClaim for Lottie`, error)
       return NO_CLAIM
     }
@@ -77,7 +77,7 @@ export const getLuckyClaim = async (
           },
         }
       }
-    } catch (error) {
+    } catch (error:  any) {
       console.error(`Failed to check canClaim for Lucky`, error)
       return NO_CLAIM
     }
@@ -103,12 +103,12 @@ export const getBallerClaim = async (
             mintData: { bunnyId: variationId, lotteryId, cursor: '0' },
           }
         }
-      } catch (error) {
+      } catch (error:  any) {
         console.error(`Failed to check canClaim for Baller`, error)
         return NO_CLAIM
       }
     }
-  } catch (error) {
+  } catch (error:  any) {
     console.error(`Failed to check whitelist for ${account}`, error)
     return NO_CLAIM
   }
