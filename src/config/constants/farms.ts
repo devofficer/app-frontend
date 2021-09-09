@@ -3,7 +3,7 @@ import { FarmConfig } from './types'
 
 const farms1: FarmConfig[] = [
   {
-    pid: 0,
+    pid: 253,
     lpSymbol: 'GVS-BUSD',
     lpAddresses: {
       97: '0x9C21123D94b93361a29B2C2EFB3d5CD8B17e0A9e',
