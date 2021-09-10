@@ -33,6 +33,21 @@ export const BUSD: { [chainId: number]: Token } = {
   ),
 }
 
+export const GVS: { [chainId: number]: Token } = {
+  [ChainId.MAINNET]: new Token(ChainId.MAINNET, '0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56', 18, 'GVS', 'Binance GVS'),
+  [ChainId.TESTNET]: new Token(ChainId.TESTNET, '0xeD24FC36d5Ee211Ea25A80239Fb8C4Cfd80f12Ee', 18, 'GVS', 'Binance GVS'),
+}
+
+export const CO2: { [chainId: number]: Token } = {
+  [ChainId.MAINNET]: new Token(ChainId.MAINNET, '0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56', 18, 'CO2', 'Binance CO2'),
+  [ChainId.TESTNET]: new Token(ChainId.TESTNET, '0xeD24FC36d5Ee211Ea25A80239Fb8C4Cfd80f12Ee', 18, 'CO2', 'Binance CO2'),
+}
+
+export const BTC: { [chainId: number]: Token } = {
+  [ChainId.MAINNET]: new Token(ChainId.MAINNET, '0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56', 18, 'BTC', 'Binance BTC'),
+  [ChainId.TESTNET]: new Token(ChainId.TESTNET, '0xeD24FC36d5Ee211Ea25A80239Fb8C4Cfd80f12Ee', 18, 'BTC', 'Binance BTC'),
+}
+
 export const WBNB = new Token(ChainId.MAINNET, '0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c', 18, 'WBNB', 'Wrapped BNB')
 export const DAI = new Token(ChainId.MAINNET, '0x1AF3F329e8BE154074D8769D1FFa4eE058B1DBc3', 18, 'DAI', 'Dai Stablecoin')
 export const USDT = new Token(ChainId.MAINNET, '0x55d398326f99059fF775485246999027B3197955', 18, 'USDT', 'Tether USD')
@@ -842,6 +857,33 @@ const tokens = {
     symbol: 'BUSD',
     address: {
       56: '0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56',
+      97: '',
+    },
+    decimals: 18,
+    projectLink: 'https://www.paxos.com/busd/',
+  },
+  gvs: {
+    symbol: 'GVS',
+    address: {
+      56: 'GVS_TOKEN_SMALL-01',
+      97: '',
+    },
+    decimals: 18,
+    projectLink: 'https://www.paxos.com/busd/',
+  },
+  co2: {
+    symbol: 'CO2',
+    address: {
+      56: 'CARBO_CREDIT_SMALL-01',
+      97: '',
+    },
+    decimals: 18,
+    projectLink: 'https://www.paxos.com/busd/',
+  },
+  btc: {
+    symbol: 'BTC',
+    address: {
+      56: 'NET0_BTC_SMALL-01',
       97: '',
     },
     decimals: 18,
