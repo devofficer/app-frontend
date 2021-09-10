@@ -50,7 +50,7 @@ const Home: React.FC = () => {
 
   return (
     <>
-      <PageHeaderBgPic backgroundImage='/images/home/banner-1.png' >
+      <PageHeaderBgPic backgroundImage="/images/home/banner-1.png">
         <Heading as="h1" scale="xl" color="#000" mb="24px">
           {t('PancakeSwap')}
         </Heading>
@@ -59,11 +59,36 @@ const Home: React.FC = () => {
         </Heading>
       </PageHeaderBgPic>
       <PageSection
-        innerProps={{ style: { margin: '0', width: '100%', 'paddingTop':'0px', 'paddingBottom':'0px'} }}
-        background={ theme.isDark ? '#170E25' : '#D9CDED' }
+        innerProps={{ style: { margin: '0', width: '100%', paddingTop: '0px', paddingBottom: '0px' } }}
+        background={theme.isDark ? '#170E25' : '#D9CDED'}
         index={2}
         hasCurvedDivider={false}
       >
+        <img
+          src="/images/energySystem/DAPP_Assets_Homepage_Hydro_transparent-01.png"
+          alt="tako"
+          style={{
+            position: 'absolute',
+            left: '-40px',
+            top: '-100px',
+            width: '500px',
+            height: '500px',
+            opacity: '0.2',
+          }}
+        />
+        <img
+          src="/images/energySystem/DAPP_Assets_Homepage_wind_transparent-01.png"
+          alt="tako"
+          style={{
+            position: 'absolute',
+            left: '85%',
+            bottom: '-50px',
+            width: '500px',
+            height: '500px',
+            transform: 'translateX(-50%)',
+            opacity: '0.2',
+          }}
+        />
         <Cards>
           <FarmStakingCard />
           <EnergyChart />
@@ -74,7 +99,7 @@ const Home: React.FC = () => {
           <GpnLpWorth />
         </Cards>
       </PageSection>
-      
+
       {/* <PageSection
         innerProps={{ style: { margin: '0', width: '100%', 'paddingTop':'0px', 'paddingBottom':'0px' } }}
         background={theme.colors.background}

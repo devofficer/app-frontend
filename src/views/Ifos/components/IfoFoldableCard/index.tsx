@@ -23,7 +23,7 @@ import { EnableStatus } from './types'
 import IfoPoolCard from './IfoPoolCard'
 import Timer from './Timer'
 import Achievement from './Achievement'
-import useIfoApprove from '../../hooks/useIfoApprove'
+import useIfoApprove from '../../hooks/useIfoApprove';
 
 interface IfoFoldableCardProps {
   ifo: Ifo
@@ -80,6 +80,7 @@ const CardsWrapper = styled.div<{ singleCard: boolean }>`
   margin: 0 auto 32px;
   width: 400px;
   max-width: 400px;
+  position: relative;
 `
 
 const StyledCardBody = styled(CardBody)`
@@ -140,21 +141,46 @@ const IfoFoldableCard: React.FC<IfoFoldableCardProps> = ({ ifo, publicIfoData, w
   }, [account, raisingTokenContract, contract, setEnableStatus])
 
   return (
-      <StyledCardBody>
-        <CardsWrapper singleCard={!publicIfoData.poolBasic || !walletIfoData.poolBasic}>
-          {publicIfoData.poolBasic && walletIfoData.poolBasic && (
-            <IfoPoolCard
-              poolId={PoolIds.poolBasic}
-              ifo={ifo}
-              publicIfoData={publicIfoData}
-              walletIfoData={walletIfoData}
-              onApprove={handleApprove}
-              enableStatus={enableStatus}
-            />
-          )}
-        </CardsWrapper>
-        <Achievement ifo={ifo} publicIfoData={publicIfoData} />
-      </StyledCardBody>
+    <StyledCardBody>
+      <CardsWrapper singleCard={!publicIfoData.poolBasic || !walletIfoData.poolBasic}>
+        <img
+          src="/images/energySystem/DAPP_Assets_Homepage_Hydro_transparent-01.png"
+          alt="tako"
+          style={{
+            position: 'absolute',
+            left: '-315px',
+            top: '-186px',
+            width: '500px',
+            height: '500px',
+            opacity: '0.2',
+          }}
+        />
+        <img
+          src="/images/energySystem/DAPP_Assets_Homepage_wind_transparent-01.png"
+          alt="tako"
+          style={{
+            position: 'absolute',
+            left: '110%',
+            bottom: '-300px',
+            width: '500px',
+            height: '500px',
+            transform: 'translateX(-50%)',
+            opacity: '0.2',
+          }}
+        />
+        {publicIfoData.poolBasic && walletIfoData.poolBasic && (
+          <IfoPoolCard
+            poolId={PoolIds.poolBasic}
+            ifo={ifo}
+            publicIfoData={publicIfoData}
+            walletIfoData={walletIfoData}
+            onApprove={handleApprove}
+            enableStatus={enableStatus}
+          />
+        )}
+      </CardsWrapper>
+      <Achievement ifo={ifo} publicIfoData={publicIfoData} />
+    </StyledCardBody>
   )
 }
 

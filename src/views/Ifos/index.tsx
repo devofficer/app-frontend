@@ -30,7 +30,7 @@ const Ifos = () => {
 
   return (
     <>
-      <PageHeaderBgPic backgroundImage='/images/ifos/banner-1.png' >
+      <PageHeaderBgPic backgroundImage="/images/ifos/banner-1.png">
         <Heading as="h1" scale="xl" color="#000" mb="24px">
           {t('IFO: Initial Farm Offerings')}
         </Heading>

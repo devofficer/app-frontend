@@ -294,6 +294,31 @@ const Farms: React.FC = () => {
       </PageHeaderBgPic>
       <Page>
         <ControlContainer>
+          <img
+            src="/images/energySystem/DAPP_Assets_Homepage_Hydro_transparent-01.png"
+            alt="tako"
+            style={{
+              position: 'absolute',
+              left: '-250px',
+              top: '-130px',
+              width: '500px',
+              height: '500px',
+              opacity: '0.2',
+            }}
+          />
+          <img
+            src="/images/energySystem/DAPP_Assets_Homepage_wind_transparent-01.png"
+            alt="tako"
+            style={{
+              position: 'absolute',
+              left: '100%',
+              bottom: '-700px',
+              width: '500px',
+              height: '500px',
+              transform: 'translateX(-50%)',
+              opacity: '0.2',
+            }}
+          />
           <ViewControls>
             <FarmTabButtons hasStakeInFinishedFarms={stakedInactiveFarms.length > 0} />
           </ViewControls>
