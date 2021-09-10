@@ -278,10 +278,10 @@ const Farms: React.FC = () => {
     <>
       <PageHeaderBgPic>
         <Heading as="h1" scale="xl" color="#000" mb="24px">
-          {t('Farms')}
+          {t('Energy Yield Farms')}
         </Heading>
         <Heading scale="md" color="#170E25">
-          {t('Stake LP tokens to earn.')}
+          {t('Stake your project tokens to earn yield backed by real clean energy.')}
         </Heading>
         <NavLink exact activeClassName="active" to="/farms/auction" id="lottery-pot-banner">
           <Button p="0" variant="text">

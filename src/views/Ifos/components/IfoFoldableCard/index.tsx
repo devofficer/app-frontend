@@ -179,7 +179,7 @@ const IfoFoldableCard: React.FC<IfoFoldableCardProps> = ({ ifo, publicIfoData, w
           />
         )}
       </CardsWrapper>
-      <Achievement ifo={ifo} publicIfoData={publicIfoData} />
+      {/* <Achievement ifo={ifo} publicIfoData={publicIfoData} /> */}
     </StyledCardBody>
   )
 }
