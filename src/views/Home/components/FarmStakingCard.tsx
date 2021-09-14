@@ -76,17 +76,15 @@ const FarmedStakingCard = () => {
       <CardBody>
         <Heading scale="xl" mb="24px">
           {t('Farms & Staking')}
-         </Heading>
-        <CardImage src="/images/cake.svg" alt="cake logo" width={64} height={64} />
+        </Heading>
+        <CardImage src="/images/energySystem/DAPP_Assets_Homepage_solar_transparent-01.png" alt="cake logo" width={64} height={64} />
         <Block>
           <Label>{t('CAKE to Harvest')}:</Label>
           <CardValue fontSize="14px" decimals={0} value={256351414} />
-
         </Block>
         <Block>
           <Label>{t('CAKE in Wallet')}:</Label>
           <CardValue fontSize="14px" decimals={0} value={256351414} />
-          
         </Block>
         <Actions>
           {account ? (
