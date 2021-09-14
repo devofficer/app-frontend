@@ -13,6 +13,9 @@ const PageLoader: React.FC = () => {
   return (
     <Wrapper>
       <Spinner />
+      {/* <video width="100" height="100">
+        <source src="/videos/loader.mp4" type="video/mp4" />
+      </video> */}
     </Wrapper>
   )
 }
