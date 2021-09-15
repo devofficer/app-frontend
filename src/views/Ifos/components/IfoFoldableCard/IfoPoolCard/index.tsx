@@ -3,6 +3,7 @@ import { useTranslation } from 'contexts/Localization'
 import styled from 'styled-components'
 import ExpandableSectionButton from 'components/ExpandableSectionButton'
 import { Card, CardBody, CardHeader, Text, useTooltip, HelpIcon, Flex, Progress } from '@pancakeswap/uikit';
+// import { Progress } from '@pancakeswap-libs/uikit'
 import { Ifo, PoolIds } from 'config/constants/types'
 import { useProfile } from 'state/profile/hooks'
 import { PublicIfoData, WalletIfoData } from 'views/Ifos/types'
@@ -18,6 +19,12 @@ const ExpandingWrapper = styled.div`
   overflow: hidden;
   border-radius: 0px;
   margin-bottom: -20px;
+`
+
+const ProgressBar = styled.div`
+  .dsEXc {
+    background-color: #1fc7d4;
+  }
 `
 
 interface IfoCardProps {
@@ -94,11 +101,12 @@ const SmallCard: React.FC<IfoCardProps> = ({ poolId, ifo, publicIfoData, walletI
             onApprove={onApprove}
             enableStatus={enableStatus}
           />
-          {/* <h1>Something</h1> put progress bar here */}
-          <div style={{ padding: '32px', width: '400px' }}>
-            <Progress variant='round' primaryStep={100} />
+          <div>
+            <ProgressBar>
+              <Progress variant="round" primaryStep={100} />
+            </ProgressBar>
           </div>
-          <h1 style={{textAlign: "center", marginBottom:"20px"}}>Finished</h1>
+          <h1 style={{ textAlign: 'center', marginBottom: '20px', marginTop: '20px' }}>Finished</h1>
           <IfoCardActions
             poolId={poolId}
             ifo={ifo}
@@ -127,7 +135,7 @@ const SmallCard: React.FC<IfoCardProps> = ({ poolId, ifo, publicIfoData, walletI
           <a
             target="_blank"
             rel="noreferrer noopener"
-            href="https://treasurekey.bet/"
+            href="https://www.grayblockpower.com/"
             color="#1FC7D4"
             className="sc-gsTCUz sc-lmoMRL ikDOqW iqbrwR"
             style={{
