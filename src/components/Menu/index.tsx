@@ -19,10 +19,10 @@ const Menu = (props) => {
   return (
     <UikitMenu
       userMenu={<UserMenu />}
-      lightLogoUrl="/images/logo-light-1.png"
-      darkLogoUrl="/images/logo-light-1.png"
-      mobileLightLogoUrl="/images/logo-light-1.png"
-      mobileDarkLogoUrl="/images/logo-light-1.png"
+      lightLogoUrl="/images/logo-light-2.png"
+      darkLogoUrl="/images/logo-light-2.png"
+      mobileLightLogoUrl="/images/logo-light-2.png"
+      mobileDarkLogoUrl="/images/logo-light-2.png"
       globalMenu={<GlobalSettings />}
       isDark={isDark}
       toggleTheme={toggleTheme}

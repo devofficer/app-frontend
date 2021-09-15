@@ -156,9 +156,27 @@ const IfoCardTokens: React.FC<IfoCardTokensProps> = ({
     }
     if (publicIfoData.status === 'finished') {
       return userPoolCharacteristics.amountTokenCommittedInLP.isEqualTo(0) ? (
-        <Flex flexDirection="column" alignItems="center">
-          <BunnyPlaceholderIcon width={80} mb="16px" />
-          <Text>{t('You didn’t participate in this sale!')}</Text>
+        <Flex flexDirection="row" alignItems="flex-start">
+          {/* <BunnyPlaceholderIcon width={80} mb="16px" /> */}
+          <img
+            src="/images/tokens/GVS_TOKEN_SMALL-01.svg"
+            alt="tako"
+            style={{
+              height: '64px',
+              width: '64px',
+              marginTop: '40px',
+            }}
+          />
+          <div>
+            <Text fontSize="25px" textAlign="right" fontWeight="900" color="#1FC7D4">
+              {t('GVS')}
+            </Text>
+            <Text fontSize="15px" textAlign="right">
+              {t(
+                "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s text do something.",
+              )}
+            </Text>
+          </div>
         </Flex>
       ) : (
         <>
