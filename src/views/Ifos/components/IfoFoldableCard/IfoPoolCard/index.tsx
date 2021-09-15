@@ -98,6 +98,7 @@ const SmallCard: React.FC<IfoCardProps> = ({ poolId, ifo, publicIfoData, walletI
           <div style={{ padding: '32px', width: '400px' }}>
             <Progress variant='round' primaryStep={100} />
           </div>
+          <h1 style={{textAlign: "center", marginBottom:"20px"}}>Finished</h1>
           <IfoCardActions
             poolId={poolId}
             ifo={ifo}
