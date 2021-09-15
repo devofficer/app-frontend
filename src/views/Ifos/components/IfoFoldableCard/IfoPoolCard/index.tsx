@@ -3,7 +3,6 @@ import { useTranslation } from 'contexts/Localization'
 import styled from 'styled-components'
 import ExpandableSectionButton from 'components/ExpandableSectionButton'
 import { Card, CardBody, CardHeader, Text, useTooltip, HelpIcon, Flex, Progress } from '@pancakeswap/uikit';
-// import { Progress } from '@pancakeswap-libs/uikit'
 import { Ifo, PoolIds } from 'config/constants/types'
 import { useProfile } from 'state/profile/hooks'
 import { PublicIfoData, WalletIfoData } from 'views/Ifos/types'
@@ -103,10 +102,10 @@ const SmallCard: React.FC<IfoCardProps> = ({ poolId, ifo, publicIfoData, walletI
           />
           <div>
             <ProgressBar>
-              <Progress variant="round" primaryStep={100} />
+              <Progress variant="round" primaryStep={75} />
             </ProgressBar>
           </div>
-          <h1 style={{ textAlign: 'center', marginBottom: '20px', marginTop: '20px' }}>Finished</h1>
+          <h1 style={{ textAlign: 'center', marginBottom: '20px', marginTop: '20px' }}>75% filled</h1>
           <IfoCardActions
             poolId={poolId}
             ifo={ifo}
