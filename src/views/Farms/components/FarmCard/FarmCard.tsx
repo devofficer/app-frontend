@@ -24,7 +24,13 @@ const StyledCard = styled(Card)`
   align-self: baseline;
   border-radius: 65px 0 65px 0;
   padding: 0;
-  background: #383E42;
+  background: #383e42;
+  .fSeSzp {
+    border-radius: 0;
+  }
+  .cpWAud {
+    border-radius: 0;
+  }
 `
 
 const FarmCardInnerContainer = styled(Flex)`

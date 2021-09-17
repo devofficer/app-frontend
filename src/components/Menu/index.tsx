@@ -19,10 +19,10 @@ const Menu = (props) => {
   return (
     <UikitMenu
       userMenu={<UserMenu />}
-      lightLogoUrl="/images/logo-light-2.png"
+      lightLogoUrl="/images/logo-dark-2.png"
       darkLogoUrl="/images/logo-light-2.png"
-      mobileLightLogoUrl="/images/logo-light-2.png"
-      mobileDarkLogoUrl="/images/logo-light-2.png"
+      mobileLightLogoUrl="/images/logo-mobile-dark-light.png"
+      mobileDarkLogoUrl="/images/logo-mobile-dark-light.png"
       globalMenu={<GlobalSettings />}
       isDark={isDark}
       toggleTheme={toggleTheme}
@@ -33,7 +33,7 @@ const Menu = (props) => {
       links={config(t)}
       profile={{
         username: profile?.username,
-        image: profile?.nft ? `/images/nfts/${profile.nft?.images.sm}` : undefined,
+        image: profile?.nft ? `/images/nfts/${profile.nft?.images.sm}` : '/images/mascot_profile_pic.png',
         profileLink: '/profile',
         noProfileLink: '/profile',
         showPip: !profile?.username,
