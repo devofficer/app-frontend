@@ -12,7 +12,7 @@ const StyledPage = styled.div`
   padding: 16px;
   padding-bottom: 0;
   min-height: calc(100vh - 64px);
-  background: ${({ theme }) => theme.isDark ? '#170E25' : '#D9CDED' };
+  background: ${({ theme }) => theme.isDark ? '#1C2730' : '#30BFF1' };
 
   ${({ theme }) => theme.mediaQueries.xs} {
     background-size: auto;

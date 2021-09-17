@@ -63,7 +63,7 @@ const App: React.FC = () => {
   usePollCoreFarmData()
 
   useEffect(() => {
-    document.body.style.backgroundColor = '#170E25'
+    document.body.style.backgroundColor = '#1C2730'
   },[]);
 
   return (

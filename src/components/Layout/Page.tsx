@@ -11,7 +11,7 @@ const StyledPage = styled(Container)`
   min-height: calc(100vh - 64px);
   padding-top: 16px;
   padding-bottom: 16px;
-  background: ${({ theme }) => theme.isDark ? '#170E25' : '#D9CDED' };
+  background: ${({ theme }) => theme.isDark ? '#1C2730' : '#30BFF1' };
 
   ${({ theme }) => theme.mediaQueries.sm} {
     padding-top: 24px;

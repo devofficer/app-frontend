@@ -60,7 +60,7 @@ const Home: React.FC = () => {
       </PageHeaderBgPic>
       <PageSection
         innerProps={{ style: { margin: '0', width: '100%', paddingTop: '0px', paddingBottom: '0px' } }}
-        background={theme.isDark ? '#170E25' : '#D9CDED'}
+        background={theme.isDark ? '#1C2730' : '#30BFF1'}
         index={2}
         hasCurvedDivider={false}
       >
