@@ -34,19 +34,11 @@ const GpnLpWorth = () => {
     <StyledGpnStats>
       <CardBody>
         <Heading scale="lg" mb="28px">
-          {t('GPN LP Worth')}
+          {t('Project Values')}
         </Heading>
         <Row>
-          <Text fontSize="14px">{t('GPN-BNB')}</Text>
-          <CardValue fontSize="14px" decimals={0} value={6.446}  prefix="$" />
-        </Row>
-        <Row>
-          <Text fontSize="14px">{t('GPN-BUSD')}</Text>
+          <Text fontSize="14px">{t('GVS-BUSD')}</Text>
           <CardValue fontSize="14px" decimals={0} value={0.331}  prefix="$" />
-        </Row>
-        <Row>
-          <Text fontSize="14px">{t('GPN-GVE')}</Text>
-          <CardValue fontSize="14px" decimals={0} value={4.561}  prefix="$" />
         </Row>
       </CardBody>
     </StyledGpnStats>

@@ -6,7 +6,7 @@ import PageHeaderBgPic from 'components/PageHeader/PageHeaderBgPic'
 import PageSection from 'components/PageSection'
 import { useWeb3React } from '@web3-react/core'
 import useTheme from 'hooks/useTheme'
-import GpnStats from 'views/Home/components/GpnStats'
+import GrayblockStats from 'views/Home/components/GrayblockStats'
 import GpnLpWorth from 'views/Home/components/GpnLpWorth'
 // import CakeStats from 'views/Home/components/CakeStats'
 // import TotalValueLockedCard from './components/TotalValueLockedCard'
@@ -95,7 +95,7 @@ const Home: React.FC = () => {
         </Cards>
 
         <Cards>
-          <GpnStats />
+          <GrayblockStats />
           <GpnLpWorth />
         </Cards>
       </PageSection>

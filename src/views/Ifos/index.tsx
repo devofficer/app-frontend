@@ -32,10 +32,10 @@ const Ifos = () => {
     <>
       <PageHeaderBgPic backgroundImage="/images/ifos/banner-1.png">
         <Heading as="h1" scale="xl" color="#000" mb="24px">
-          {t('IFO: Initial Farm Offerings')}
+          {t('Initial ENERGY FARM OFFERING')}
         </Heading>
         <Heading scale="md" color="#170E25">
-          {t('Buy new tokens with a brand new token sale model.')}
+          {t('Buy New Energy Project Tokens to generate energy backed yield')}
         </Heading>
       </PageHeaderBgPic>
       <StyledPage>

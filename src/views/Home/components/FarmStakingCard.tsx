@@ -79,11 +79,15 @@ const FarmedStakingCard = () => {
         </Heading>
         <CardImage src="/images/energySystem/DAPP_Assets_Homepage_solar_transparent-01.png" alt="cake logo" width={64} height={64} />
         <Block>
-          <Label>{t('CAKE to Harvest')}:</Label>
+          <Label>{t('Energy Payment to Harvest')}:</Label>
           <CardValue fontSize="14px" decimals={0} value={256351414} />
         </Block>
         <Block>
-          <Label>{t('CAKE in Wallet')}:</Label>
+          <Label>{t('Total Energy Generated since Harvest (kWh)')}:</Label>
+          <CardValue fontSize="14px" decimals={0} value={256351414} />
+        </Block>
+        <Block>
+          <Label>{t('Average Price per Energy (kWh)')}:</Label>
           <CardValue fontSize="14px" decimals={0} value={256351414} />
         </Block>
         <Actions>
