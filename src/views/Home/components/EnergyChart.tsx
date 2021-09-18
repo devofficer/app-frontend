@@ -69,7 +69,7 @@ const LotteryCard = () => {
       borderCapStyle: 'round',
       gridLines: { display: false },
       ticks: {
-        fontFamily: 'Kanit, sans-serif',
+        fontFamily: 'Manrope, sans-serif',
         fontColor: color,
         fontSize: 12,
         lineHeight,
