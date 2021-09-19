@@ -62,10 +62,6 @@ const App: React.FC = () => {
   useFetchProfile()
   usePollCoreFarmData()
 
-  useEffect(() => {
-    document.body.style.backgroundColor = '#1C2730'
-  },[]);
-
   return (
     <Router history={history}>
       <ResetCSS />
