@@ -14,7 +14,27 @@ import HarvestAction from './HarvestAction'
 import useApproveFarm from '../../hooks/useApproveFarm'
 
 const Action = styled.div`
-  padding-top: 16px;
+  padding: 16px 24px;
+  background-color: ${({ theme }) => (theme.isDark ? '#727272' : '#EAEAEA')};
+  margin: 0 -24px;
+`
+
+const CustomText = styled.div`
+  color: ${({ theme }) => (theme.isDark ? '#F9F9ED' : '#000')};
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.5;
+  text-transform: uppercase;
+  font-size: 12px;
+`
+const CustomText2 = styled.div`
+  color: ${({ theme }) => (theme.isDark ? '#F9F9ED' : '#000')};
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.5;
+  text-transform: uppercase;
+  font-size: 12px;
+  padding-right: 4px;
 `
 export interface FarmWithStakedValue extends Farm {
   apr?: number
@@ -81,26 +101,28 @@ const CardActions: React.FC<FarmCardActionsProps> = ({ farm, account, addLiquidi
   }
 
   return (
-    <Action>
-      <Flex>
-        <Text bold textTransform="uppercase" color="secondary" fontSize="12px" pr="4px">
-          {farm.token.symbol}
-        </Text>
-        <Text bold textTransform="uppercase" color="textSubtle" fontSize="12px">
-          {t('Earned')}
-        </Text>
-      </Flex>
-      <HarvestAction earnings={earnings} pid={pid} />
-      <Flex>
-        <Text bold textTransform="uppercase" color="secondary" fontSize="12px" pr="4px">
-          {farm.token.symbol}
-        </Text>
-        <Text bold textTransform="uppercase" color="textSubtle" fontSize="12px">
-          {t('Staked')}
-        </Text>
-      </Flex>
-      {!account ? <ConnectWalletButton mt="8px" width="100%" /> : renderApprovalOrStakeButton()}
-    </Action>
+    <>
+      <Action>
+        <Flex>
+          <CustomText2>
+            {farm.token.symbol}
+          </CustomText2>
+          <CustomText>
+            {t('Earned')}
+          </CustomText>
+        </Flex>
+        <HarvestAction earnings={earnings} pid={pid} />
+        <Flex>
+          <CustomText2>
+            {farm.token.symbol}
+          </CustomText2>
+          <CustomText>
+            {t('Staked')}
+          </CustomText>
+        </Flex>
+      </Action>
+      {!account ? <ConnectWalletButton mt="24px" mb="24px" width="100%" /> : renderApprovalOrStakeButton()}
+    </>
   )
 }
 

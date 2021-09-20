@@ -45,7 +45,26 @@ const ExpandingWrapper = styled.div`
   overflow: hidden;
   border-radius: 0px;
 `
+const CustomText = styled.div`
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 1.5;
+  color: ${({ theme }) => theme.isDark ? '#F9F9ED' : '#000'};
+`
+const CustomText2 = styled.div`
+  font-size: 16px;
+  font-weight: 900;
+  line-height: 1.5;
+  color: ${({ theme }) => (theme.isDark ? '#BFBFBF' : '#BFBFBF')};
+`
 
+const CustomDivForAPREarn = styled.div`
+  background-color: ${({ theme }) => (theme.isDark ? '#383e42' : '#FFF')};
+  margin: 0 -24px;
+  padding: 16px 24px;
+  gap: 16px;
+  display: grid;
+`
 interface FarmCardProps {
   farm: FarmWithStakedValue
   displayApr: string
@@ -78,6 +97,7 @@ const FarmCard: React.FC<FarmCardProps> = ({ farm, displayApr, removed, cakePric
   return (
     <StyledCard isActive={isPromotedFarm}>
       <FarmCardInnerContainer>
+        <img src="/images/farm-header.png" alt="img" style={{ position: 'absolute', top: 0, left: 0, opacity: 0.31 }} />
         <CardHeading
           lpLabel={lpLabel}
           multiplier={farm.multiplier}
@@ -85,32 +105,34 @@ const FarmCard: React.FC<FarmCardProps> = ({ farm, displayApr, removed, cakePric
           token={farm.token}
           quoteToken={farm.quoteToken}
         />
-        {!removed && (
-          <Flex justifyContent="space-between" alignItems="center">
-            <Text>{t('Forecasted APR')}:</Text>
-            <Text bold style={{ display: 'flex', alignItems: 'center' }}>
-              {farm.apr ? (
-                <ApyButton
-                  variant="text-and-button"
-                  pid={farm.pid}
-                  lpSymbol={farm.lpSymbol}
-                  multiplier={farm.multiplier}
-                  lpLabel={lpLabel}
-                  addLiquidityUrl={addLiquidityUrl}
-                  cakePrice={cakePrice}
-                  apr={farm.apr}
-                  displayApr={displayApr}
-                />
-              ) : (
-                <Skeleton height={24} width={80} />
-              )}
-            </Text>
+        <CustomDivForAPREarn>
+          {!removed && (
+            <Flex justifyContent="space-between" alignItems="center">
+              <CustomText>{t('APR')}:</CustomText>
+              <Text bold style={{ display: 'flex', alignItems: 'center', color:"#F9F9ED" }}>
+                {farm.apr ? (
+                  <ApyButton
+                    variant="text-and-button"
+                    pid={farm.pid}
+                    lpSymbol={farm.lpSymbol}
+                    multiplier={farm.multiplier}
+                    lpLabel={lpLabel}
+                    addLiquidityUrl={addLiquidityUrl}
+                    cakePrice={cakePrice}
+                    apr={farm.apr}
+                    displayApr={displayApr}
+                  />
+                ) : (
+                  <Skeleton height={24} width={80} />
+                )}
+              </Text>
+            </Flex>
+          )}
+          <Flex justifyContent="space-between">
+            <CustomText>{t('Earn')}:</CustomText>
+            <CustomText2>{earnLabel}</CustomText2>
           </Flex>
-        )}
-        <Flex justifyContent="space-between">
-          <Text>{t('Earn')}:</Text>
-          <Text bold>{earnLabel}</Text>
-        </Flex>
+        </CustomDivForAPREarn>
         <CardActionsContainer
           farm={farm}
           lpLabel={lpLabel}

@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import BigNumber from 'bignumber.js'
-import { Button, Flex, Heading } from '@pancakeswap/uikit'
+import { Button, Flex, Heading } from '@pancakeswap-libs/uikit'
 import { useTranslation } from 'contexts/Localization'
 import { useAppDispatch } from 'state'
 import { fetchFarmUserDataAsync } from 'state/farms'
@@ -12,10 +12,13 @@ import { usePriceCakeBusd } from 'state/farms/hooks'
 import Balance from 'components/Balance'
 import useHarvestFarm from '../../hooks/useHarvestFarm'
 
+
 interface FarmCardActionsProps {
   earnings?: BigNumber
   pid?: number
 }
+
+
 
 const HarvestAction: React.FC<FarmCardActionsProps> = ({ earnings, pid }) => {
   const { account } = useWeb3React()
@@ -38,6 +41,7 @@ const HarvestAction: React.FC<FarmCardActionsProps> = ({ earnings, pid }) => {
         )}
       </Flex>
       <Button
+        className="harvest_btn"
         disabled={rawEarningsBalance.eq(0) || pendingTx}
         onClick={async () => {
           setPendingTx(true)

@@ -1,5 +1,5 @@
 import React from 'react'
-import { Button, useWalletModal } from '@pancakeswap-libs/uikit'
+import { Button, useWalletModal, ExButton } from '@pancakeswap-libs/uikit'
 import useAuth from 'hooks/useAuth'
 import { useTranslation } from 'contexts/Localization'
 
@@ -10,9 +10,9 @@ const ConnectWalletButton = (props) => {
 
 
   return (
-    <Button onClick={onPresentConnectModal} {...props} >
+    <ExButton onClick={onPresentConnectModal} {...props} >
       {t('Connect Wallet')}
-    </Button>
+    </ExButton>
     // <Button {...props}>
     //   {t('Connect Wallet')}
     // </Button>
