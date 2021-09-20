@@ -65,6 +65,13 @@ const CustomDivForAPREarn = styled.div`
   gap: 16px;
   display: grid;
 `
+
+const ImageComponent = styled.div`
+  position: absolute;
+  top: 0;
+  left: 0;
+  opacity: ${({ theme }) => (theme.isDark ? 0.31 : 1.0)};
+`
 interface FarmCardProps {
   farm: FarmWithStakedValue
   displayApr: string
@@ -97,7 +104,9 @@ const FarmCard: React.FC<FarmCardProps> = ({ farm, displayApr, removed, cakePric
   return (
     <StyledCard isActive={isPromotedFarm}>
       <FarmCardInnerContainer>
-        <img src="/images/farm-header.png" alt="img" style={{ position: 'absolute', top: 0, left: 0, opacity: 0.31 }} />
+        <ImageComponent>
+          <img src="/images/farm-header.png" alt="img" />
+        </ImageComponent>
         <CardHeading
           lpLabel={lpLabel}
           multiplier={farm.multiplier}
@@ -109,7 +118,7 @@ const FarmCard: React.FC<FarmCardProps> = ({ farm, displayApr, removed, cakePric
           {!removed && (
             <Flex justifyContent="space-between" alignItems="center">
               <CustomText>{t('APR')}:</CustomText>
-              <Text bold style={{ display: 'flex', alignItems: 'center', color:"#F9F9ED" }}>
+              <Text bold style={{ display: 'flex', alignItems: 'center', color: '#F9F9ED' }}>
                 {farm.apr ? (
                   <ApyButton
                     variant="text-and-button"
