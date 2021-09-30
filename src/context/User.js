@@ -17,6 +17,7 @@ export default function AuthProvider(props) {
 
   let data = {
     updateUser: (account) => {
+      // console.log(account)
       setSession(account);
     },
     connectWallet: () => {
@@ -36,6 +37,7 @@ export default function AuthProvider(props) {
   }, []); //eslint-disable-line
 
   useEffect(() => {
+    // console.log(account)
     data.updateUser(account);
   }, [account]); //eslint-disable-line
 
