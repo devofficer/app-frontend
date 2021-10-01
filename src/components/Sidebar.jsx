@@ -1,17 +1,21 @@
 import React, { useEffect, useState } from "react";
+import { toast } from 'react-toastify';
 
 const Sidebar = ({ setOpen, TokenContract }) => {
   const [balance, setBalance] = useState(0);
+
   useEffect(async () => {
     try {
       const res = await TokenContract.balanceOf(
         window.sessionStorage.getItem("userAddress")
       );
+      console.log(res.toString())
       setBalance(res.toString());
     } catch (err) {
-      console.log(err.message);
+      toast.error(err.message);
     }
   }, []);
+
   return (
     <div
       className="bg-secondary text-white"
