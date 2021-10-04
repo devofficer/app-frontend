@@ -17,7 +17,7 @@ const Header = ({ open, setOpen }) => {
         )}
         {account && ACTIVE_NETWORK !== chainId && (
           <a className="navbar-brand" href="#">
-            <span>please Change Net. to Kovan</span>
+            <span>please Change to BSC testnet</span>
           </a>
         )}
         {!account && (
