@@ -18,11 +18,11 @@ const Content = ({ TokenContract, PoolContract, StakeContract, ProjectContract }
   const [goal, setGoal] = useState(0)
   const [iHash, setIHash] = useState("");
 
-  async function recieveToken() {
+  async function receiveToken() {
     try {
       const faucet = await TokenContract.faucet(drip);
       console.log(faucet)
-      toast.success("Recieve tokens request success");
+      toast.success("Receive tokens request success");
     } catch (err) {
       toast.error(err.message);
     }
@@ -32,7 +32,7 @@ const Content = ({ TokenContract, PoolContract, StakeContract, ProjectContract }
     try {
       const approve = await TokenContract.approve(poolAddress, drip);
       console.log(approve)
-      toast.success("Recieve tokens request approved");
+      toast.success("Receive tokens request approved");
     } catch (err) {
       toast.error(err.message);
     }
@@ -147,9 +147,9 @@ const Content = ({ TokenContract, PoolContract, StakeContract, ProjectContract }
                 border: "1px solid #6c757d",
                 borderRadius: "3px",
               }}
-              onClick={recieveToken}
+              onClick={receiveToken}
             >
-              Recieve tokens
+              Receive tokens
             </button>
           </div>
           {/* Approve trade token for use in IFO */}
@@ -249,16 +249,16 @@ const Content = ({ TokenContract, PoolContract, StakeContract, ProjectContract }
                   getRefund ? PoolContract.getRefund() : PoolContract.claimTokens()
                 }}
               >
-                {getRefund ? "Get Refund" : "Recieve project tokens"}
+                {getRefund ? "Get Refund" : "Receive project tokens"}
               </button>
             </div>
           </div>
-          {/* Approve trade token for use in staking */}
+          {/* Approve project token for use in staking */}
           <div className="mb-4">
-            <h6>Approve trade token for use in staking</h6>
+            <h6>Approve project token for use in staking</h6>
             <div className="mb-3 position-relative">
               <label className="form-label" style={{ fontSize: "12px" }}>
-                You need to approve the trade token for use in staking
+                You need to approve the project token for use in staking
               </label>
               <input
                 name="approvestake"
@@ -306,7 +306,7 @@ const Content = ({ TokenContract, PoolContract, StakeContract, ProjectContract }
           <div className="mb-4">
             <h6>Stake project tokens</h6>
             <span style={{ fontSize: "12px" }}>
-              Stake project token to recieve proprtional yield from the energy
+              Stake project token to receive proprtional yield from the energy
               form
             </span>
             <div className="mb-3 position-relative">
@@ -365,7 +365,7 @@ const Content = ({ TokenContract, PoolContract, StakeContract, ProjectContract }
                 }}
                 onClick={() => StakeContract.claimReward()}
               >
-                Recieve rewards
+                Receive rewards
               </button>
             </div>
           </div>
